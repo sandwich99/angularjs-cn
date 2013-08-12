@@ -85,7 +85,7 @@ AngularJS只是你开发实际网页的工具箱的一部分. 在这一节, 我�
 ![ide](figure/3-1.png)
 
 最大的你应该考虑使用WebStorm开发AngularJS原因是它是唯一继承AngularJS插件的IDEs. 这个插件支持在你的HTML模板中正确的自动完成AngularJS的HTML标签. 这些都是常用的代码片段, 否则你每次都要输入拼凑的代码片段. 因此不应该像下面这样输入:
-
+```js
 	directive('$directiveName$', function factory($injectables$){
 		var directiveDefinitionObject = {
 			$directiveAttr$;
@@ -98,11 +98,11 @@ AngularJS只是你开发实际网页的工具箱的一部分. 在这一节, 我�
 		};
 		return directiveDefinitionObject;
 	});
-
+```
 在WebStorm中, 你可以只输入以下内容:
-
+```bash
 	ngdc
-
+```
 然后按`Tab`键获取同样的代码. 这只是大多数代码自动完成插件提供的功能之一.
 
 ##运行你的应用程序
@@ -112,15 +112,15 @@ AngularJS只是你开发实际网页的工具箱的一部分. 在这一节, 我�
 ###使用Yeoman
 
 Yeoman让你很简单的使用一个Web服务器服务你所有的静态资源和相关的JavaScript文件. 只需要运行以下命令:
-	
+```bash
 	yeoman server
-
+```
 它将启动一个服务器同时在你的浏览器中打开AngularJS应用程序的主页. 每当你改变你的源代码时, 它甚至会刷新(自动刷新)浏览器. 很酷不是吗?
 
 ###不使用Yeoman
 
 如果不使用Yeoman, 你可能需要配置一个服务器来服务你所有主目录中的文件. 如果你不知道一个简单的方法做到这一点, 或者不想浪费时间创建你自己的Web服务器, 你可以在Node.js中使用ExpressJS快速的编写一个简单的Web服务器(只要简单的使用`npm install -g express`来获取它). 它可能看起来像下面这样:
-
+```js
 	//available at chapter3/sample-app/web-server.js
 
 	var express = require('express'),
@@ -135,21 +135,21 @@ Yeoman让你很简单的使用一个Web服务器服务你所有的静态资源�
 
 	app.listen(port);
 	console.log("Now serving the app at http://localhost:" + port + "app");
-
+```
 一旦你有了这个文件, 你就可以使用Node运行这个文件, 通过使用下面的命令:
-
+```bash
 	node web-server.js
-
+```
 同时它将在8080端口启动服务器(或者你自己选择端口).
 
 可选的, 在应用程序文件夹中使用Python你应该运行:
-
+```bash
 	python -m SimpleHTTPServer
-
+```
 无论你是否决定继续, 一旦你配置好服务器并运行起来, 都将被导航导下面的URL:
-
+```
 	http://localhost:[port-number]/app/index.html
-
+```
 然后你就可以在浏览器中查看你刚刚创建的应用程序. 注意, 你需要手动的刷新浏览器来查看改变, 不同于使用Yeoman.
 
 ##测试AngularJS
@@ -183,25 +183,25 @@ Karma存在的主要的原因是它让你的测试驱动开发(TDD)流程变得�
 那么, 我们如何获取迷人的Karma呢? 好吧, 首先确保在你的机器上安装了NodeJS. 它自带了NPM(Node包管理器), 这使得它易于管理和安装成千上万的NodeJS可用的库.
 
 一旦你安装了NodeJS和NPM, 安装Karma只需要简单的运行下面的命令:
-
+```bash
 	sudo npm install -g karma
-
+```
 到这里. 你只要简单的三部来开始使用Karma(我刚才说了, 请不要了解它现实上是怎么使用的).
 
 **获取配置文件**:
 
 如果你是用Yeoman创建应用程序骨架, 那么你就已经有一个现成的Karma配置文件等你来使用. 如果不是, 那么继续, 并且在你的应用程序目录的根文件夹中执行下面的命令:
-
+```bash
 	karma init
-
+```
 在你的终端控制器中执行(定位到目录文件夹,然后执行命令), 他会生成一个虚拟的配置文件(`karma.conf.js`), 你可以根据你的喜好来编辑它, 它默认带有一些很好的标准. 你可以使用它.
 
 **启动Karma服务器**
 
 只需要运行下面的命令:
-
+```bash
 	karma start [optionalPathToConfigFile]
-
+```
 这将会在9876端口启动Karma服务器(这是默认情况, 你可以通过编辑在上一步提到的`karma.conf.js`文件来改变). 虽然Karma应该打开一个浏览器并自动捕获它, 它将在控制台中打印所有其他浏览器中捕获所需要的指令. 如果你懒得这样做, 只需要在其他浏览器或者设备中浏览`http://localhost:9876`, 并且你最好在多个浏览器中运行测试.
 
 > 虽然Karma可以自动捕获常用的浏览器, 在启动时.(FireFox, Chrome, IE, Opera, 甚至是PhantomJS), 但它不仅限于只是这些浏览器. 任何可以浏览一个URL的设备都可能可以作为Karma运行器. 因此如果你打开你的iPhone或者Android设备上浏览器并浏览`http://machinename:9876`(只要是可访问的), 你都可能在移动设备上运行同样的测试.
@@ -209,15 +209,15 @@ Karma存在的主要的原因是它让你的测试驱动开发(TDD)流程变得�
 **运行测试**
 
 执行下面的命令:
-
+```bash
 	karma run
-
+```
 就是这样. 运行这个命令之后, 你应该获得正好打印在控制台中的结果. 很简单, 不是吗?
 
 ##单元测试
 
 AngularJS是的编写单元测试变得更简单, 默认情况下支持编写[Jasmine](http://pivotal.github.io/jasmine/)风格的测试(就是Karma). Jasmine就是我们所说的行为驱动开发框架, 它允许你编写规范来说明你的代码行为应该如何表现. 一个Jasmine测试范例看起来可能是这样子的.
-
+```js
 	describe("MyController:", function(){
 		it("to work correctly", function(){
 			var a = 12;
@@ -227,7 +227,7 @@ AngularJS是的编写单元测试变得更简单, 默认情况下支持编写[Ja
 			expect(a).not.toBe(null);
 		});
 	});
-
+```
 正如你可以看到, 它本身就是非常容易阅读的格式, 大部分的代码都可以用简单的英文来阅读理解. 它还提供了一个非常多样化和强大的匹配集合(就像`expect`从句), 当然它还有[xUnit](http://xunit.codeplex.com/)常用的`setUp`和`tearDowns`(函数在每个独立的测试用例之前或者之后执行).
 
 AngularJS提供了一些优雅的原型, 和测试函数一样, 它允许你有在单元测试中创建服务, 控制器和过滤器的权利, 以及模拟`HTTPRequests`输出等等. 我们将在第五章讨论这个.
@@ -251,7 +251,7 @@ AngularJS视图通过提供一个Scenario Runner来模拟用户与应用程序�
 Scenario Runner允许你按照类Jasmine的语法来描述应用程序. 正如之前的单元测试, 我们将会有一些的`describes`(针对这个特性), 同时它还是独立(描述每个单独功能的特性). 和往常一样, 你可以有一些共同的行为, 对于执行每个规范之前和之后.(我们称之为测试).
 
 来看一个应用程序示例, 他返回过滤器结果列表, 看起来可能像下面这样:
-
+```js
 	describe("Search Results", function(){
 		beforeEach(function(){
 			browser().navigateTo("http://localhost:8000/app/index.html");
@@ -264,7 +264,7 @@ Scenario Runner允许你按照类Jasmine的语法来描述应用程序. 正如�
 			expect(repeater("ul li").count()).toEqual(1);
 		});
 	});
-
+```
 有两种方式运行这些测试. 不过, 无论使用那种方式运行它们, 你都必须有一个Web服务器来启动你的应用程序服务(请参见上一节来查看如何做到这一点). 一旦做到这一点, 可以使用下列方法之一:
 
 1. **自动化**: Karma现在支持运行Angular情景测试. 创建一个Karma配置文件然后进行以下改变:
@@ -322,9 +322,9 @@ Angular意识也意味着Angular直到所有的XHR何时向服务器放出, 从�
 这项工作的原因是编译器(Closure或者UglifyJS)并不会重命名你从模板中引用的属性.  因此, 你的模板会继续工作, 仅仅重命名局部变量和参数.
 
 对于Google Closure, 只需简单的调用下面的命令:
-
+```bash
 	java -jar closure_compiler.js --compilation_level | SIMPLE_OPTIMIZATIONS --js path/to/files.js
-
+```
 **高级优化**
 
 高级优化有一点棘手, 它会试图重名几乎任何东西和每个函数. 得到这个级别的优化工作, 你将需要通过显示的告诉它哪些函数, 变量和属性需要重命名(通过使用一个externsfile). 者通常是通过模板访问函数和属性.
@@ -334,24 +334,24 @@ Angular意识也意味着Angular直到所有的XHR何时向服务器放出, 从�
 要记住一件事: 当你想要压缩代码时, 你要使用依赖注入的形式(在控制器上指定`$inject`属性).
 
 下面的代码不会工作
-
+```js
 	function MyController($scope, $resource){
 		//Stuff here
 	}
-
+```
 你需要像下面这样做:
-
+```js
 	function MyController($scope, $resource){
 		//Some Stuff here
 	}
 	MyController.$inject = ['$scope', '$resource'];
-
+```
 或者是使用模块, 像这样:
-
+```js
 	myAppModule('MyController', ['$scope', '$resource', function($scope, $resource){
 		//Some stuff here
 	}]);
-
+```
 一旦所有的变量都混肴或者压缩只有, 这是使用Angular找出那些你最初使用的服务和变量的方式.
 
 > 每次都是数组的方式注入是比较好的处理发方式, 以避免开始编译代码时的错误. 挠头并视图找出为什么提供的$e变量丢失了(一些任务的混肴版本压缩了它)是不值得的.
@@ -463,9 +463,9 @@ Figure 3-5. AngularJS properties within Batarang
 + 添加单元测试
 
 所有的这些在Yeoman中使用下面的命令可以在一步完成:
-
+```bash
 	yeoman init angular:route routeName
-
+```
 因此, 如果你运行`yeoman iniy angular route home`结束之后它将执行以下操作:
 
 + 在`app/scripts/controllers`目录中创建一个`home.js`控制器骨架
@@ -480,9 +480,9 @@ Figure 3-5. AngularJS properties within Batarang
 我们已经看过使用Karma如何轻松的启动和运行测试. 最终, 运行所有的单元测试只需要两条命令.
 
 Yeoman使它变得更容易(如果你相信它). 每当你使用Yeoman生成一个文件, 它都会给你创建一个填充它的测试存根. 一旦你安装了Karma, 使用Yeoman运行测试只需执行下面的命令即可:
-
+```bash
 	yeoman test
-
+```
 ###构建项目
 
 构建一个完备的应用程序可能是痛苦的, 或者至少涉及到需要步骤. Yeoman通过允许你像下面这样做减轻了不少痛苦:
@@ -493,9 +493,9 @@ Yeoman使它变得更容易(如果你相信它). 每当你使用Yeoman生成一�
 + 生成应用程序缓存清单
 
 所有的这些好处都来自于一条命令:
-
+```bash
 	yeoman build
-
+```
 Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会到来.
 
 ##使用RequireJS整合AngularJS
@@ -537,7 +537,7 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
     b. /**e2e**: 包含端到端的场景规范
 
 我们所需要做的第一件事情是在`main.js`文件(在app目录)中引入RequireJS, 然后使用它加载所有的其他依赖项. 这里有一个例子, 我们的JS项目除了自己的代码还会依赖于jQuery和Twitter的Bootstrap.
-
+```js
 	//the app/scripts/main.js file, which defines our RequireJS config
 	require.config({
 		paths: {
@@ -583,20 +583,20 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
 			]);
 		}
 	);
-
+```
 然后我们定义一个`app.js`文件. 这个文件定义我们的AngularJS应用程序, 同时告诉它, 它依赖于我们所定义的所有控制器, 服务, 过滤器和指令. 我们所看到的RequireJS依赖列表中所提到的只是一点点.
 
 你可以认为RequireJS依赖列表就是一个JavaScript的import语句块. 也就是说, 代码块内的函数直到所有的依赖列表都满足或者加载完成它都不会执行.
 
 另外请注意, 我们不会单独 告诉RequireJS, 载入的执行,服务或者过滤器是什么, 因为这些并不属于项目的结构. 每个控制器, 服务, 过滤器和指令都是一个模块, 因此只定义这些为我们的依赖就可以了.
-
+```js
 	// The app/scripts/app.js file, which defines our AngularJS app
 	define(['angular', 'angularResource', 'controllers/controllers','services/services', 'filters/filters','directives/directives'],function (angular) {
 		return angular.module(‘MyApp’, ['ngResource', 'controllers', 'services','filters', 'directives']);
 	});
-
+```
 我们还有一个`bootstrap.js`文件, 它到等到DOM准备就绪(这里使用的RequireJS的插件`domReady`), 然后告诉AngularJS继续执行, 这是很好的.
-
+```js
 	// The app/scripts/bootstrap.js file which tells AngularJS
 	// to go ahead and bootstrap when the DOM is loaded
 	define(['angular', 'domReady'], function(angular, domReady) {
@@ -604,11 +604,11 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
 			angular.bootstrap(document, [‘MyApp’]);
 		});
 	});
-
+```
 这里将引导从应用程序中分割出来, 还有一个有事, 即我们可以使用一个伪造的文件潜在的取代我们的`mainApp`或者出于测试的目的使用一个`mockApp`. 例如 如果你所依赖的服务器不可开, 你只需要创建一个`fakeApp`使用伪造的数据来替换所有的`$http`请求, 以保持你的开发秩序. 这样的话, 你就可以只悄悄的使用一个`fakeBootstrap`和一个`fakeApp`到你的应用程序中.
 
 现在, 你的`main.html`主模板(app目录中)可能看起来像下面这样:
-
+```html
 	<!DOCTYPE html>
 	<html> <!-- Do not add ng-app here as we bootstrap AngularJS manually-->
 	<head>
@@ -624,20 +624,20 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
 		<script data-main="scripts/main" src="lib/require/require.min.js"></script>
 	</body>
 	</html>
-
+```
 现在, 我们来看看`js/controllers/controllers.js`文件, 这看起来几乎与`js/directives/directives.js`, `js/filters/filters.js`和`js/services/services.js`一模一样:
-
+```js
 	define(['angular'], function(angular){
 		'use strict';
 		return angular.module('controllers', []);
 	});
-
+```
 因为我们使用了RequireJS依赖的结构, 所有的这些都会保证只在Angular依赖满足并加载完成的情况下才会运行.
 
 每个文件都定义为一个Angular模块, 然后通过将单个的控制器, 指令, 过滤器和服务添加到定义中来使用.
 
 让我们来看看一个指定定义(比如第二章的`focus`指令):
-
+```js
 	//File: ngbkFocus.js
 
 	define(['directives/directives'], function(directives) {
@@ -651,17 +651,17 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
 			}
 		});
 	});
-
+```
 指令自什么很琐碎的, 让我们仔细看看发生了什么. 围绕着文件的RequireJS shim告诉我们`ngbkFocus.js`依赖于在模块中声明的`directices/directives.js`文件. 然后它使用注入指令模块将自身指令声明添加进来. 你可以选择多个指令或者一个单一的对应的文件. 这完全由你决定.
 
 一个重点的注意事项: 如果你有一个控制器进入到服务中(也就是说你的`RootController`依赖于你的`UserSevice`, 并且获取`UserService`注入), 那么你必须确保将你定义的文件加入RequireJS依赖中, 就像这样:
-
+```js
 	define(['controllers/controllers', 'services/userService'], function(controllers){
 		controllers.controller('RootController', ['$scope', 'UserService', function($scope, UserService){
 			//Do what's needed
 		}]);
 	});
-
+```
 这基本上是你整个源文件目录的结构设置.
 
 但是你会问, 这如何处理我的测试? 我很高兴你会问这个问题, 因为你会得到答案.
@@ -669,7 +669,7 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
 有个很好的消息, Karma支持RequireJS. 只需安装最新和最好版本的Karma.(使用`npm install -g karma`).
 
 一旦你安装好Karma, Karma针对单元测试的配置也会响应的改变. 以下是我们如果设置我们的单元测试来运行我们之前定义的项目结构:
-
+```js
     // This file is config/karma.conf.js.
     // Base path, that will be used to resolve files
     // (in this case is the root of the project)
@@ -729,9 +729,9 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
     // Cont inuous Integrat ion mode
     // if true, it captures browsers, runs tests, and exits 
     singleRun = false;
-
+```
  我们使用一个稍微不同的格式来定义的我们的依赖(包括: false是非常重要的). 我们还添加了REQUIRE_JS和适配依赖. 最终进行这一系列工作的是`main.js`, 他会触发我们的测试.
-
+```js
 	// This file is test/spec/main.js
 
 	require.config({
@@ -772,15 +772,15 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
                 window.__karma__.start();
         });
     });
-
+```
 由此设置, 我们可以运行下面的命令
-
+```bash
 	karma start config/karma.conf.js
-
+```
 然后我们就可以运行测试了.
 
 当然, 当它涉及到编写单元测试就需要稍微的改变一下. 它们需要RequireJS支持的模块, 因此让我们来看一个测试范例:
-
+```js
 	// This is test/spec/directives/ngbkFocus.js
 	define(['angularMocks', 'directives/directives', 'directives/ngbkFocus'], function() {
 		describe('ngbkFocus Directive', function() {
@@ -798,7 +798,7 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
 			});
 		});
 	});
-
+```
 我们的每个测试将做到以下几点:
 
 1. 拉取`angularMocks`获取我们的angular, angularResource, 当然还有angularMocks.
@@ -810,7 +810,7 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
 这种方法可以用于任何测试, 而且你应该这么做.
 
 值得庆幸的是, RequireJS的处理方式并不会影响我们所有的端到端的测试, 因此可以使用我们目前所看到的方式简单的做到这一点. 一个范例配置如下, 假设你的服务其在http://localhost:8000上运行你的应用程序:
-
+```js
 	// base path, that will be used to resolve files
 	// (in this case is the root of the project 
 	basePath = '../';
@@ -856,3 +856,4 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
 	// Cont inuous Integrat ion mode
 	// if true, it capture browsers, run tests and exit
 	singleRun = false;
+```
