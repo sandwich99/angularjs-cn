@@ -350,11 +350,45 @@ $resource函数的第三个参数是可选的，主要用来传递要在resource
 
 ###简化的服务器端操作
 
+无论你使用资源简化函数机制还是回调函数，关于返回对象都有几点问题需要我们注意.
 
+返回的对象不是一个普通JS对象，实际上，他是“resource”类型的对象.这就意味着对象里除了包含服务器返回的数据以外,还有一些附加的行为函数(在这个案例中如$save()和$charge函数).这样我们就可以很方便的执行服务器端操作,比如取数据、修改数据并把修改在服务器端持久化保存下来(其实也就是一般CURD应用里面的通用操作).
 
+###对ngResource做单元测试
 
+ngResource依赖项是一个封装,它以Angular核心服务`$http`为基础.因此，你可能已经知道如何对它做单元测试了.它和我们看到的对`$http`做单元测试的样例比起来基本没什么真正的变化.你只需要知道最终的服务器端请求应该由resource发起,告诉模拟`$http`服务关于请求的信息.其他的基本都一样.下面我们来看看如何本节测试前面的代码:
 
+    describe('Credit Card Resource', function(){
+        var scope, ctrl, mockBackend;
+        beforeEach(inject(function(_$httpBackend_, $rootScope, $controller) {
+            mockBackend = _$httpBackend_;
+            scope = $rootScope.$new();
+            // Assume that CreditCard resource is used by the controller
+            ctrl = $controller(CreditCardCtrl, {$scope: scope});
+        }));
+        
+        it('should fetched list of credit cards', function() {
+            // Set expectation for CreditCard.query() call
+            mockBackend.expectGET('/user/123/card').
+                respond([{id: '234', number: '11112222'}]);
+            
+            ctrl.fetchAllCards();
 
+            // Initially, the request has not returned a response
+            expect(scope.cards).toBeUndefined();
+
+            // Tell the fake backend to return responses to all current requests
+            // that are in flight.
+            mockBackend.flush();
+
+            // Now cards should be set on the scope
+            expect(scope.cards).toEqualData([{id: '234', number: '11112222'}]);
+        });
+    });
+
+这个测试看上去和简单的`$http`单元测试非常相似,除了一些细微区别.注意在我们的expect语句里面,取代了简单的"equals"方法,哦我们用的是特殊的"toEqualData"方法.这种eapect语句会智能地省略ngResource添加到对象上的附加方法.
+
+##`$q`和预期(Promise)
 
 
 
