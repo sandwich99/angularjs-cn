@@ -588,3 +588,75 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 	</expander>
 
 ###操作DOM元素
+
+传递给指令的`link`和`compile`函数的`iElement`和`tElement`是包裹原生DOM元素的引用. 如果你已经加载了jQuery库, 你也可以使用你已经习惯使用的jQuery元素.
+
+如果你没有使用jQuery, 你也可以使用Angular内置的被称为jqLite的包装器. 它提供了一个jQuery的子集便于我们在Angular中创建任何东西. 对于多数应用程序, 你都可以单独使用这些API做任何你需要做的事情.
+
+如果你需要直接访问原生的DOM元素你可以通过使用`element[0]`访问对象的第一个元素来获得它.
+
+你可以在Angular文档的`angular.element()`查看它所支持的API的完整列表--你可以用这个函数创建你自己的jqLite包装的DOM元素. 它包含像`addClass()`, `bind()`, `find()`, `toggleClass()`等等其他方法. 其次, 其中大多数有用的核心方法都来自于jQuery, 但是它的代码亮更少.
+
+对于其他的jQuery API, 元素在Angular中都有指定的函数. 这些都是存在的, 无论你是否使用完整的jQuery库.
+
+Table 6-6. Angular specific functions on an element
+
+<table>
+	<thead>
+		<tr>
+			<th>Function</th>
+			<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>controller(name)</td>
+			<td>当你需要直接与一个控制器通信时, 这个函数会返回附加到元素上的控制器. 如果没有现有的元素, 它会遍历DOM元素并查找最近的父控制器. name参数是可选的, 它是用于指定相同元素上其他指令名称的. 如果提供这个参数, 它会从相应的指令中返回控制器. 这个名字应该与所有指令一样使用一个驼峰式的格式. 也就是说, 使用`ngModle`来替换`ng-model`的形式.</td>
+		</tr>
+		<tr>
+			<td>injector()</td>
+			<td>获取当前元素或者它的父元素的注入器. 它还允许你访问在这些元素上定义的所依赖的模块.</td>
+		</tr>
+		<tr>
+			<td>scope()</td>
+			<td>返回当前元素或者它最近的父元素的作用域.</td>
+		</tr>
+		<tr>
+			<td>inheritedData()</td>
+			<td>正如jQuery的`data()`函数, `inheritedData()`会在一个封闭的方式中设置和获取数据. 此外还能够从当前元素获取数据, 它也会遍历DOM元素并查找值.</td>
+		</tr>
+	</tbody>
+</table>
+
+这里有一个例子, 让我们重新定义之前的expander例子而不使用`ng-show`和`ng-click`. 它看起来像下面这样:
+
+	angular.module('expanderModule', [])
+		.directive('expander', function(){
+			return {
+				restrict: 'EA',
+				replace: true,
+				transclude: true,
+				scope: { title: '=expanderTitle' },
+				template: '<div>' +
+						'<div class="title">{{title}}</div>' +
+						'<div class="body closed" ng-transclude></div>' +
+						'</div>',
+						
+				link: function(scope, element, attrs) {
+					var titleElement = angular.element(element.children().eq(0));
+					var bodyElement = angular.element(element.children().eq(1));
+					
+					titleElement.bind('click', toggle);
+					
+					function toggle() {
+						bodyElement.toggleClass('closed');
+					}
+				}
+			}
+		});
+		
+这里我们从模板中移除了`ng-click`和`ng-show`. 相反的时, 当用户单击expander的title时执行所定义的行为, 我们将从title元素创建一个jqLite元素, 然后它绑定一个click事件并将`toggle()`函数作为它的回调函数. 在`toggle()`函数中, 我们在expander的body元素上调用`toggleClass()`来添加或者移除一个被称为`closed`的class(HTML类名), 这里我们给元素设置了一个值为`display: none`的类, 像下面这样:
+
+	.closed {
+		display: none;
+	}
