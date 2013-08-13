@@ -660,7 +660,7 @@ Table 6-6. Angular specific functions on an element
 	.closed {
 		display: none;
 	}
-<<<<<<< HEAD
+```
 	
 ###控制器
 
@@ -789,6 +789,3 @@ Table 6-7. Options for required controllers
 ##小结
 
 正如我们所看到的, 指令允许我们扩展HTML的语法并让很多应用程序按照我们声明的意思工作. 指令使重用(代码重用/组件复用)变得轻而易举--从使用`ng-model`和`ng-controller`配置你的应用程序, 到处理模板的任务的像`ng-repeat`和`ng-view`指令, 再到前几年被限制的可复用的组件像数据栅格, 饼图, 工具提示和选项卡等等.
-=======
-```
->>>>>>> 39e719919b7c4570888b9a77e212418ca710e748
