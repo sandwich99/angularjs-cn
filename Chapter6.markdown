@@ -660,3 +660,131 @@ Table 6-6. Angular specific functions on an element
 	.closed {
 		display: none;
 	}
+	
+###控制器
+
+当你有相互嵌套的指令需要相互通信时, 你可以通过控制器做到这一点. 比如一个\<menu\>可能需要知道它自身内部的\<menu-item\>元素它才能适当的显示或者隐藏它们. 同样的对于一个\<tab-set\>也需要知道它的\<tab\>元素, 或者一个\<grid-view\>要知道它的\<grid-element\>元素.
+
+正如前面所展示的, 创建一个API用于在指令之间沟通, 你可以使用控制器属性的语法声明一个控制器作为一个指令的一部分:
+
+	controller: function controllerConstructor($scope, $element, $attrs, $transclude)
+	
+这个控制器函数就是依赖注入, 因此这里列出的参数都是潜在的可用并且全部都是可选的--它们可以按照任意顺序列出. 它们也仅仅只是可用服务的一个子集.
+
+其他的指令也可以使用`require`属性语法将这个控制器传递给它们. 完整的`require`的形式看起来像:
+
+	require: '^?directiveName'
+	
+关于`require`字符串参数的说明可以在表6-7中找到.
+
+Table 6-7. Options for required controllers
+
+<table>
+	<thead>
+		<tr>
+			<th>Option</th>
+			<th>Usage</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>directiveName</td>
+			<td>这个指令驼峰式命名规范应该是来自于控制器. 因此如果我们的\<my-menu-item\>s指令需要在它的父元素\<my-menu\>上找到一个控制器, 我们需要将它编写为`myMenu`.</td>
+		</tr>
+		<tr>
+			<td>^</td>
+			<td>默认情况下, Angular会从同一元素的命名指令中获取控制器. 加入可选的^符号表示总是遍历DOM树来以查找指令. 对于\<my-menu\>示例, 我们需要添加这个符号; 最终的字符就是`\^myMenu`.</td>
+		</tr>
+		<tr>
+			<td>?</td>
+			<td>如果你所需要的控制器没有找到, Angular将抛出一个异常信息来告诉你遇到了什么问题. 添加一个?符号给字符串就是说这个控制器时可选的并且如果没有找到控制器它不应该抛出一个异常. 虽然者听起来不可能, 但是如果我们希望让\<my-menu-item\>不需要使用一个\<my-menu\>容器, 我们可以将这个添加给最终所需要的字符串?\^myMenu.</td>
+		</tr>
+	</tbody>
+</table>
+
+例如, 让我们重写我们的expander指令用于一组称为"手风琴"的组件, 它可以确保当你打开一个expander时, 其他的都会自动关闭. 它看起来如图6-4所示.
+
+![6-4](figure/accordion.png)
+
+图 6-4. Accordion component in multiple states
+
+首先, 让我们编写处理手风琴菜单的accordion指令. 这里我们将添加我们的控制器构造器方法来处理手风琴:
+
+	appModule.directive('accordion', function() {
+		return {
+			restrict: 'EA',
+			replace: true,
+			transclude: true,
+			template: '<div ng-transclude></div>',
+			controller: function() {
+				var expanders = [];
+				this.gotOpened = function(selectdExpander) {
+					angular.forEach(expanders, function(expander){
+						if(selectedExpander != expander) {
+							expander.showMe = false;
+						}
+					});
+				}
+				
+				this.addExpander = function(expander) {
+					expanders.push(expander);
+				}
+			}
+		}
+	});
+	
+这里我们定义了一个`addExpander()`函数给expanders便于调用它来注册自身实例. 我们也创建了一个`gotOpened()`函数给expanders便于调用, 因而让accordion的控制器可以知道它能够去关闭任何其他展开的expanders.
+
+在expander指令自身中, 我们将从它的父元素扩展它所需要的accordion控制器并在适当的时间里调用`addExpander()`和`gotOpened()`方法.
+
+	appModule.directive('expander', function(){
+		return {
+			restrict: 'EA',
+			replace: true,
+			transclude: true,
+			require: '^?accordion',
+			scope: { title: '=expanderTitle' }
+			template: '<div>' +
+					'<div class="title" ng-click="toggle()">{{title}}</div>' +
+					'<div class="body" ng-show="showMe" ng-transclude></div>' +
+					'</div>',
+			link: function(scope, element, attrs, accordionController) {
+				scope.showMe = false;
+				accordionController.addExpander(scope);
+				
+				scope.toggle = function toggle() {
+					scope.showMe = !scope.showMe;
+					accordionController.gotOpened(scope);
+				}
+			}
+		}
+	});
+
+注意在手风琴指令的控制器中我们创建了一个API, 通过它可以让expander可以相互通信.
+
+然后我们可以编写一个模板来使用这些指令, 最后生成的结果整如图6-4所示.
+
+	<body ng-controller="SomeController">
+		<accordion>
+			<expander class="expander" ng-repeat="expander in expanders" expander-title="expander.title">
+			{{expander.text}}
+			</expander>
+		</accordion>
+	</body>
+
+当然接下是对应的控制器:
+
+	function SomeController($scope){
+		$scope.expanders = [
+			{title: 'Click me to expand',
+			 text: 'Hi there folks, I am the content that was hidden but is now shown.'},
+			{title: 'Click this',
+			 text: 'I am even better text than you have seen previously'},
+			{title: 'No, click me!',
+			 text: 'I am text should be seen before seeing other texts'}
+		];
+	}
+	
+##小结
+
+正如我们所看到的, 指令允许我们扩展HTML的语法并让很多应用程序按照我们声明的意思工作. 指令使重用(代码重用/组件复用)变得轻而易举--从使用`ng-model`和`ng-controller`配置你的应用程序, 到处理模板的任务的像`ng-repeat`和`ng-view`指令, 再到前几年被限制的可复用的组件像数据栅格, 饼图, 工具提示和选项卡等等.
