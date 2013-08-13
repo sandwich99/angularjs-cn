@@ -13,7 +13,7 @@
 虽然我们喜欢这个方便输入的语法, 但是在大部分的HTML验证机制中它不是有效的. 为了支持这些, Angular指令允许你以几种方式调用任意的指令. 以下在表6-1中列出的语法, 都是等价的并能够让你偏爱的[首选的]验证器正常工作
 
 Table 6-1 HTML Validation Schemes
-
+```html
 <table>
 	<thead>
 		<tr>
@@ -45,7 +45,7 @@ Table 6-1 HTML Validation Schemes
 		</tr>
 	</tbody>
 </table>
-
+```
 由于你可以使用任意的这些形式, [AngularJS文档](http://docs.angularjs.org/)中列出了一个驼峰式的指令, 而不是任何这些选项. 例如, 在`ngRepeat`标题下你可以找到`ng-repeat`. 稍后你会看到, 在你定义你自己的指令时你将会使用这种命名格式.
 
 如果你不适用HTML验证器(大多数人都不使用), 你可以很好的使用在目前你所见过的例子中的命名空间-指令[namespace-directive]语法
@@ -53,7 +53,7 @@ Table 6-1 HTML Validation Schemes
 ##API预览
 
 下面是一个创建任意指令伪代码模板
-
+```js
 	var myModule = angular.module(...);
 
 	myModule.directive('namespaceDirectiveName', function factory(injectables) {
@@ -77,13 +77,13 @@ Table 6-1 HTML Validation Schemes
 		};
 		return directiveDefinitionObject;
 	});
-
+```
 有些选项是互相排斥的, 它们大多数都是可选的, 并且它们都有有价值的详细说明:
 
 当你使用每个选项时, 表6-2提供了一个概述.
 
 Table 6-2 指令定义选项
-
+```html
 <table>
 	<thead>
 		<tr>
@@ -138,15 +138,15 @@ Table 6-2 指令定义选项
 		</tr>
 	</tbody>
 </table>
-
+```
 下面让我们深入细节来看看.
 
 ###为你的指令命名
 
 你可以用模块的指令函数为你的指令创建一个名称, 如下所示:
-
+```js
 	myModule.directive('directiveName', function factory(injectables){...});
-
+```
 虽然你可以使用任何你喜欢的名字命名你的指令, 该符号会选择一个前缀命名空间标识你的指令, 同时避免与可能包含在你的项目中的外部指令冲突.
 
 你当然不希望它们使用一个`ng-`前缀, 因为这可能与Angular自带的指令相冲突. 如果你从事于SuperDuper MegaCorp, 你可以选择一个super-, superduper-, 或者甚至是superduper-megacorp-, 虽然你可能选择第一个选项, 只是为了方便输入.
@@ -162,7 +162,7 @@ Table 6-2 指令定义选项
 `restrict`属性允许你指定你的指令声明风格--也就是说, 它是否能够用于作为元素名称, 属性, 类[className], 或者注释. 你可以根据表6-3来指定一个或多个声明风格, 只需要使用一个字符串来表示其中的每一中风格:
 
 Table 6-3 指令声明用法选项
-
+```html
 <table>
 	<thead>
 		<tr>
@@ -194,7 +194,7 @@ Table 6-3 指令声明用法选项
 		</tr>
 	</tbody>
 </table>
-
+```
 如果你希望你的指令用作一个元素或者一个属性, 那么你应该传递`EA`作为`restrict`字符串.
 
 如果你忽略了`restrict`属性, 则默认为`A`, 并且你的指令只能用作一个属性(属性指令).
@@ -218,7 +218,7 @@ Table 6-3 指令声明用法选项
 图6-1 tab选项卡视图
 
 并不是一堆\<div\>, \<ul\>\<li\>和\<a\>元素, 你可以创建一个\<tab-set\>和\<tab\>指令, 用来声明每个单独的tab选项卡的结构. 然后你的HTML可以做的更好来表达你的模板意图. 最终结果可能看起来像这样:
-
+```html
 	<tab-set>
 		<tab title="Home">
 			<p>Welcome home!</p>
@@ -227,13 +227,13 @@ Table 6-3 指令声明用法选项
 			<!-- preferences UI goes here -->
 		</tab>
 	</tab-set>
-
+```
 你还可以给title绑定一个字符串数据, 通过在\<tab\>或者\<tab-set\>上绑定控制器处理tab选项内容. 它不仅限于用在tabs上--你还可以用于菜单, 手风琴, 弹窗, dialog对话框或者其他任何你希望以这种方式实现的地方.
 
 你可以通过`template`或者`templateUrl`属性来指定替换的DOM元素. 使用`template`通过字符串来设置模板内容, 或者使用`templateUrl`来从服务器的一个文件上来加载模板. 正如你在接下来的例子中会看到, 你可以预先缓存这些模板来减少GET请求, 这有利于提高应用的性能.
 
 让我们来编写一个dumb指令: 一个\<hello\>元素, 只是用于使用\<div\>Hi there\</div\>来替换自身. 在这里, 我们将设置`restrict`来允许元素和设置`template`显示我们所希望的东西. 由于默认的行为只将内容追加到元素中, 因此我们将设置`replace`属性为true来替换原来的模板:
-
+```js
 	var appModule = angular.module('app', []);
 	appModule.directive('hello', function(){
 		return {
@@ -242,30 +242,30 @@ Table 6-3 指令声明用法选项
 			replace: true
 		};
 	});
-
+```
 在页面中我们可以像这样使用它:
-
+```html
 	<html lang="en" ng-app="app">
 	...
 	<body>
 		<hello></hello>
 	</body>
 	...
-
+```
 将它载入到浏览器中, 我们会看到"Hi there".
 
 如果你查看页面的源代码, 在页面上你仍然会看到\<hello\>\</hello\>, 但是如果你查看生成的源代码(在Chrome中, 你可以在"Hi there"上右击然后选择审查元素), 你会看到:
-
+```html
 	<body>
 		<div>Hi there</div>
 	</body>
-
+```
 \<hello\>\</hello\>被模板中的\<div\>替换了.
 
 如果你从指令定义中移除`replace: true`, 那么你会看到\<hello\>\<div\>Hi there\</div\>\</hello\>.
 
 通常你会希望使用`templateUrl`而不是`template`, 因为输入HTML字符串并不是那么有趣. `template`属性通常有利于非常小的模板. 使用templateUrl`同样非常有用, 可以设置适当的头来使模板可缓存. 我们可以像下面这样重写我们的`hello`指令:
-
+```js
 	var appModule = angular.module('app', []);
 	appModule.directive('hello', function(){
 		return {
@@ -274,28 +274,28 @@ Table 6-3 指令声明用法选项
 			replace: true
 		};
 	});
-
+```
 在`helloTemplate.html`中, 你只需要输入:
-
+```html
 	<div>Hi there</div>
-
+```
 如果你使用Chrome浏览器, 它的"同源策略"会组织Chrome从`file://`中加载这些模板, 并且你会得到一个类似"Origin null is not allowed by Access-Control-Allow-Origin."的错误. 那么在这里, 你有两个选择:
 
 + 通过服务器来加载应用
 + 在Chrome中设置一个标志. 你可以通过在命令行中使用`chrome --allow-file-access-from-files`命令来运行Chrome做到这一点.
 
 这将会通过`templateUrl`加载这些文件, 然而, 这会让你的用户要等待到指令加载. 如果你希望在首页加载模板, 你可以在一个`script`标签中将它作为这个页面的一部分包含进来, 就像这样:
-
+```html
 	<script type="text/ng-template" id="helloTemplateInline.html">
 		<div>Hi there</div>
 	</script>
-
+```
 这里的id属性很重要, 因为这是Angular用来存储模板的URL键. 稍候你将会使用这个id在指令的`templateUrl`中指定要插入的模板.
 
 这个版本能够很好的载入而不需要服务器, 因为没有必要的`XMLHttpRequest`来获取内容.
 
 最后, 你可以越过`$http`或者以其他机制来加载你自己的模板, 然后将它们直接设置在Angular中称为`$templateCache`的对象上. 我们希望在指令运行之前缓存中的这个模板可用, 因此我们将通过module上的run函数来调用它.
-
+```js
 	var appModule = angular.module('app', []);
 
 	appModule.run(function($templateCache){
@@ -309,7 +309,7 @@ Table 6-3 指令声明用法选项
 			replace: true;
 		};
 	});
-
+```
 你可能希望在产品中这么做, 仅仅作为一个减少所需的GET请求数量的技术. 你可以运行一个脚本将所有的模板合并到一个单独的文件中, 并在一个新的模块中加载它, 然后你就可以从你的主应用程序模块中引用它.
 
 ####Transclusion
@@ -317,18 +317,18 @@ Table 6-3 指令声明用法选项
 除了替换或者追加内容, 你还可以通过`transclude`属性将原来的内容移到新模板中. 当设置为true时, 指令将删除原来的内容, 但是在你的模板中通过一个名为`ng-transclude`的指令重新插入来使它可用. 
 
 我们可以使用transclusion来改变我们的示例:
-
+```js
 	appModule.directive('hello', function() {
 		return {
 			template: '<div>Hi there <span ng-transclude></span></div>',
 			transclude: true
 		};
 	});
-
+```
 像这样来应用它:
-
+```html
 	<div hello>Bob</div>
-
+```
 你会看到: "Hi there Bob."
 
 ###编译和链接功能
@@ -356,28 +356,28 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 虽然你毫无疑问的应该学习编译和链接之间的不同, 以及每个功能, 你需要编写的大部分的指令都不需要转换模板; 你还会编写大部分的链接函数.
 
 让我们再看看每个语法来比较一下, 我们有:
-
+```js
 	compile: function compile(tElement, tAttrs, transclude) {
 		return {
 			pre: function preLink(scope, iElement, iAttrs, controller) {...},
 			post: function postLink(scope, iElement, iAttrs, controller) {...}
 		}
 	}
-
+```
 以及链接:
-
+```js
 	link: function postLink(scope, iElement, iAttrs) {...}
-
+```
 注意这里有一点不同的是`link`函数获得了一个作用域的访问, 而`compile`没有. 这是因为在编译阶段期间, 作用域并不存在. 然而你有能力从`compile`函数返回`link`函数. 这些`link`函数能够访问到作用域.
 
 还要注意的是`compile`和`link`都会获得一个到它们对应的DOM袁术和这些元素属性[attributes]列表的引用. 这里的一点区别是`compile`函数是从模板中获得模板元素和属性, 并且会获取到`t`前缀. 而`link`函数使用模板创建的视图实例中获得它们的, 它们会获取到`i`前缀.
 
 这种区别只存在于当指令位于其他指令中制造模板副本的时候. `ng-repeat`就是一个很好的例子.
-
+```html
 	<div ng-repeat="thing in things">
 		<my-widget config="thing"></my-widget>
 	</div>
-
+```
 这里, `compile`函数将只被调用一次, 而`link`函数在每次复制`my-widget`时都会被调用一次--等价于元素在things中的数量. 因此, 如果`my-widget`需要到所有`my-widget`副本(实例)中修改一些公共的东西, 为了提升效率, 正确的做法是在`compile`函数中处理. 
 
 你可能还会注意到`compile`函数好哦的了一个`transclude`属性函数. 这里, 你还有机会以编写一个函数以编程的方式transcludes内容, 对于简单的的基于模板不足以transclusion的情况.
@@ -395,7 +395,7 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 3. 从它的父层**隔离出来的作用域**不带有模型属性. 当你在创建可重用的组件而需要从父作用域中隔离指令操作时, 你将会希望使用这个选项.
 
 你可以使用下面的语法来创建这些作用域类型的配置:
-
+```html
 <table>
 	<thead>
 		<tr>
@@ -418,7 +418,7 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 		</tr>
 	<tbody>
 </table>
-
+```
 当你创建一个隔离的作用域时, 默认情况下你不需要访问父作用域中模型中的任何东西. 然而, 你也可以指定你想要的特定属性传递到你的指令中. 你可以认为是吧这些属性名作为参数传递给函数的.
 
 注意, 虽然隔离的作用域不就成模型属性, 但它们仍然是其副作用域的成员. 就像所有其他作用域一样, 它们都有一个`$parent`属性引用到它们的父级.
@@ -426,22 +426,22 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 你可以通过传递一个指令属性名的映射的方式从父作用域传递特定的属性到隔离的作用域中. 这里有三种合适的方式从父作用域中传递数据. 我们称这些传递数据不同的方式为"绑定策略". 你也可以可选的指定一个局部别名给属性名称.
 
 以下是没有别名的语法:
-
+```js
 	scope: {
 		attributeName1: 'BINDING_STRATEGY',
 		attributeName2: 'BINDING_STRATEGY',...
 	}
-
+```
 以下是使用别名的方式:
-
+```js
 	scope: {
 		attributeAlias: 'BINDING_STRATEGY' + 'templateAttributeName',...
 	}
-
+```
 绑定策略被定义为表6-4中的符号:
 
 表6-4 绑定策略
-
+```html
 <table>
 	<thead>
 		<tr>
@@ -464,7 +464,7 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 		</tr>
 	</tbody>
 </table>
-
+```
 这些都是相当抽象的概念, 因此让我们来看一个具体的例子上的变化来进行说明. 比方说我们希望创建一个`expander`指令在标题栏被点击时显示额外的内容.
 
 收缩时它看起来如图6-2所示.
@@ -480,22 +480,22 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 图6-3 Expander in open state
 
 我们会编写如下代码:
-
+```html
 	<div ng-controller="SomeController">
 		<expander class="expander" expander-title="title">
 			{{text}}
 		</expander>
 	</div>
-
+```
 标题(Cliked me to expand)和文本(Hi there folks...)的值来自于闭合的作用域中. 我们可以像下面这样来设置一个控制器:
-
+```js
 	function SomeController($scope) {
 		$scope.title = 'Clicked me to expand';
 		$scope.text = 'Hi there folks, I am the content that was hidden but is now shown.';
 	}
-
+```
 然后我们可以来编写指令:
-
+```js
 	angular.module('expanderModule', [])
 		.directive('expander', function(){
 			return {
@@ -515,9 +515,9 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 				}
 			}
 		});
-
+```
 然后编写下面的样式:
-
+```css
 	.expander {
 		border: 1px solid black;
 		width: 250px;
@@ -531,11 +531,11 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 	.expander > .body {
 		padding: .1em .3em;
 	}
-
+```
 接下来让我们来看看指令中的每个选项是做什么的, 在表6-5中.
 
 表6-5 Functions of elements
-
+```html
 <table>
 	<thead>
 		<tr>
@@ -570,23 +570,23 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 		</tr>
 	</tbody>
 </table>
-
+```
 如果我们像使用更多有意义的东西来在模板中定义`expander title`而不是在模型中, 我们还可以使用传递通过在作用域声明中使用`@`符号传递一个字符串风格的属性, 就像下面这样:
-
+```js
 	scope: { title: '@expanderTitle'},
-
+```
 在模板中我们就可以实现相同的效果:
-
+```html
 	<expander class="expander" expander-title="Click mr to expand">
 		{{text}}
 	</expander>
-
+```
 注意, 对于@策略我们仍然可以通过使用插入法将title数据绑定到我们的控制器作用域中:
-
+```html
 	<expander class="expander" expander-title="{{title}}">
 		{{text}}
 	</expander>
-
+```
 ###操作DOM元素
 
 传递给指令的`link`和`compile`函数的`iElement`和`tElement`是包裹原生DOM元素的引用. 如果你已经加载了jQuery库, 你也可以使用你已经习惯使用的jQuery元素.
@@ -600,7 +600,7 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 对于其他的jQuery API, 元素在Angular中都有指定的函数. 这些都是存在的, 无论你是否使用完整的jQuery库.
 
 Table 6-6. Angular specific functions on an element
-
+```html
 <table>
 	<thead>
 		<tr>
@@ -627,9 +627,9 @@ Table 6-6. Angular specific functions on an element
 		</tr>
 	</tbody>
 </table>
-
+```
 这里有一个例子, 让我们重新定义之前的expander例子而不使用`ng-show`和`ng-click`. 它看起来像下面这样:
-
+```js
 	angular.module('expanderModule', [])
 		.directive('expander', function(){
 			return {
@@ -654,12 +654,13 @@ Table 6-6. Angular specific functions on an element
 				}
 			}
 		});
-		
+```
 这里我们从模板中移除了`ng-click`和`ng-show`. 相反的时, 当用户单击expander的title时执行所定义的行为, 我们将从title元素创建一个jqLite元素, 然后它绑定一个click事件并将`toggle()`函数作为它的回调函数. 在`toggle()`函数中, 我们在expander的body元素上调用`toggleClass()`来添加或者移除一个被称为`closed`的class(HTML类名), 这里我们给元素设置了一个值为`display: none`的类, 像下面这样:
-
+```css
 	.closed {
 		display: none;
 	}
+<<<<<<< HEAD
 	
 ###控制器
 
@@ -788,3 +789,6 @@ Table 6-7. Options for required controllers
 ##小结
 
 正如我们所看到的, 指令允许我们扩展HTML的语法并让很多应用程序按照我们声明的意思工作. 指令使重用(代码重用/组件复用)变得轻而易举--从使用`ng-model`和`ng-controller`配置你的应用程序, 到处理模板的任务的像`ng-repeat`和`ng-view`指令, 再到前几年被限制的可复用的组件像数据栅格, 饼图, 工具提示和选项卡等等.
+=======
+```
+>>>>>>> 39e719919b7c4570888b9a77e212418ca710e748
