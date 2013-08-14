@@ -388,12 +388,58 @@ ngResource依赖项是一个封装,它以Angular核心服务`$http`为基础.因
 
 这个测试看上去和简单的`$http`单元测试非常相似,除了一些细微区别.注意在我们的expect语句里面,取代了简单的"equals"方法,哦我们用的是特殊的"toEqualData"方法.这种eapect语句会智能地省略ngResource添加到对象上的附加方法.
 
-##`$q`和预期(Promise)
+##`$q`和预期值(Promise)
 
+目前为止，我们已经看到了AngulrJS是如何实现它的异步延迟API机制.
 
+预期值建议(Promise proposa)是AngularJS构建异步延迟API的底层基础.作为底层机制,预期值建议(Promise proposa)为异步请求做了下面这些事:
 
++ 异步请求返回的是一个预期(promise)而不是一个具体数据值.
++ 预期值有一个`then`函数,这个函数有两个从拿书，一个参数函数响应"resolved“或者"sucess"事件,另外一个参数函数响应"rejected”或者"failure"事件.这些函数以一个结果参数调用，或者以一个拒绝原因参数调用.
++ 确保当结果返回的时候，两个参数函数中有一个将会被调用
 
+大多数的延迟机制和Q(详见$q API文档)是以上面这种方法实现的,AngularJS为什么这样实现具体是因为以下原因:
 
++ $q对于整个AngularJS是可见的，因此它被集成到作用域数据模型里面。这样返回数据就能快速传递,UI上的闪烁更新也就更少.
++ AngularJS模板也能识别$q预期值,因为预期值可以被当作结果值一样对待，而不是把它仅仅当作结果的预期.这种预期值会在响应返回时被通知提醒.
++ 更小的覆盖范围:AngularJS仅仅实现那些基本的、对于公共异步任务的需求来说最重要的延迟函数机制.
+
+你也许会问这样的问题:为什么我们会做如此疯狂激进的实现机制?让我们先看一个在在异步函数使用方面的标准问题：
+
+    fetchUser(function(user) {
+        fetchUserPermissions(user, function(permissions) {
+            fetchUserListData(user, permissions, function(list) {
+                // Do something with the list of data that you want to display
+            });
+        });
+    });
+上面这个代码就是人们使用JavaScirpt时经常抱怨的令人恐惧的深层嵌套缩进椎体的噩梦.返回值异步本质与实际问题的同步需求之间产生矛盾:导致多级函数包含关系,在这种情况下要想准确跟踪里面某句代码的执行上下文环境就很难.
+
+另外,这种情况对错误处理也有很大影响.错误处理的最好方法是什么?在每次都做错误处理?那代码结构就会非常乱.
+
+为了解决上面这些问题,预期值建议(Promise proposal)机制提供了一个then函数的概念,这个函数会在响应成功返回的时候调用相关的函数去执行,另一方面，当产生错误的时候也会干相同的事，这样整个代码就有嵌套结构变为链式结构.所以之前那个例子用预期值API机制(至少在AngularJS中已经被实现的)改造一下,代码结构会平整许多：
+    var deferred = $q.defer();
+    var fetchUser = function() {
+        // After async calls, call deferred.resolve with the response value
+        deferred.resolve(user);
+
+        // In case of error, call
+        deferred.reject(‘Reason for failure’);
+    }
+    // Similarly, fetchUserPermissions and fetchUserListData are handled
+
+    deferred.promise.then(fetchUser)
+        .then(fetchUserPermissions)
+        .then(fetchUserListData)
+        .then(function(list) {
+            // Do something with the list of data
+        }, function(errorReason) {
+            // Handle error in any of the steps here in a single stop
+    });
+
+那个完全的横椎体代码一下子被优雅地平整了,而且提供了链式的作用域,以及一个单点的错误处理.你在你自己的应用中处理异步请求回调时也可以用相同的代码，只要调用Angular的$q服务.这种机制可以帮我做一些很酷的事情：比如响应拦截.
+
+##响应拦截
 
 
 
