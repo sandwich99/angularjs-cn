@@ -93,13 +93,13 @@ Table 7-1 Functions on the $location service
 		<tr>
 			<th>Getter Function</th>
 			<th>Getter Value</th>
-			<td>Setter Function</th>
+			<th>Setter Function</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
 			<td>absUrl()</td>
-			<td>*http://www.host.com/base/index.html#!/path?param1=value1#hashValue*</td>
+			<td><i>http://www.host.com/base/index.html#!/path?param1=value1#hashValue,</i></td>
 			<td>N/A</td>
 		</tr>
 		<tr>
