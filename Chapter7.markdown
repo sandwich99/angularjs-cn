@@ -38,4 +38,110 @@
 	
 ####用或者不用$apply?
 
-对于AngularJS开发者来说什么时候调用`$scope.$apply()`, 什么时候不能调用它是比较混乱的. 
+对于AngularJS开发者来说什么时候调用`$scope.$apply()`, 什么时候不能调用它是比较混乱的. 互联网上的建议和谣言非常猖獗. 在本小节我们将让它变得非常清楚.
+
+但是首先让我们先尝试以一个简单的形式使用`$apply`.
+
+`Scope.$apply`就像一个延迟的worker. 我们会告诉它有很多工作要做, 它负责响应并确保更新绑定和所有变化的视图效果. 但并不是所有的时间都只做这项工作, 它只会在它觉得有足够的工作要做时才会做. 在所有的其他情况下, 它只是点点头并标记在稍候处理. 它只是在你给它指示时并显示的告诉它处理实际的工作. AngularJS只是定期在它的声明周期内做这些, 但是如果调用来自于外部(比如说一个jQuery UI事件), `scope.$apply`只是做一个标记, 但并不会做任何事. 这就是为什么要调用`scope.$apply`来告诉它"嘿!你现在需要做这件事, 而不是等待!".
+
+这里有四个快速的提示告诉你应该什么时候(以及如何)调用`$apply`.
+
++ **不要**始终调用它. 当AngularJS发现它将导致一个异常(在其`$digest`周期内, 我们调用它)时调用`$apply`. 因此"有备无患"并不是你希望使用的方法.
+
++ 当控制器在AngularJS外部(DOM时间, 外部回调函数如jQuery UI控制器等等)调用AngularJS函数时**调用**它. 对于这一点, 你希望告诉AngularJS来更新它自身(模型, 视图等等), 而`$apply`就是做这个的.
+
++ 只要可能, 通过传递给`$apply`来执行你的代码或者函数, 而不是执行函数, 然后调用`$apply()`. 例如, 执行下面的代码:
+
+	$scope.$apply(function(){
+		$scope.variable1 = 'some value';
+		excuteSomeAction();
+	});
+	
+而不是下面的代码:
+
+	$scope.variable1 = 'some value';
+	excuteSomeAction();
+	$scope.$apply();
+	
+尽管这两种方式将有相同的效果, 但是它们的方式明显不同.
+
+第一个会在`excuteSomeAction`被调用时将捕获发生的任何错误,  而后者则会瞧瞧的忽略此类错误. 只有使用第一种方式时你才会从AngularJS中获取错误的提示.
+
++ kaov使用类似的`safeApply`:
+
+	$scope.safeApply = function(fn){
+		var phase = this.$root.$$phase;
+		if(phase == '$apply' || phase == '$digest') {
+			if(fn && (typeof(fn) === 'function')) {
+				fn();
+			}
+		}else{
+			this.$apply(fn);
+		}
+	};
+	
+你可以在顶层作用域或者根作用域中捕获到它, 然后在任何地方使用`$scope.$safeApply`函数. 一直都在讨论这个, 希望在未来的版本中这会称为默认的行为.
+
+是否那些其他的方法也可以在`$location`对象中使用呢? 表7-1包含了一个快速的参考用于让你绑定使用.
+
+让我们来看看`$location`服务是如何表现的, 如果浏览器中的URL时`http://www.host.com/base/index.html#!/path?param1=value1#hashValue`.
+
+Table 7-1 Functions on the $location service
+
+<table>
+	<thead>
+		<tr>
+			<th>Getter Function</th>
+			<th>Getter Value</th>
+			<td>Setter Function</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>absUrl()</td>
+			<td>*http://www.host.com/base/index.html#!/path?param1=value1#hashValue*</td>
+			<td>N/A</td>
+		</tr>
+		<tr>
+			<td>hash()</td>
+			<td>hashValue</td>
+			<td>hash('newHash')</td>
+		</tr>
+		<tr>
+			<td>host()</td>
+			<td>www.host.com</td>
+			<td>N/A</td>
+		</tr>
+		<tr>
+			<td>path()</td>
+			<td>/path</td>
+			<td>path('/newPath')</td>
+		</tr>
+		<tr>
+			<td>protocol()</td>
+			<td>http</td>
+			<td>N/A</td>
+		</tr>
+		<tr>
+			<td>search()</td>
+			<td>{'a':'b'}</td>
+			<td>search({'c':'def'})</td>
+		</tr>
+		<tr>
+			<td>url()</td>
+			<td>/path?param1=value1?hashValue</td>
+			<td>url('/newPath?p2=v2')</td>
+		</tr>
+	</tbody>
+</table>
+
+表7-1的Setter Function一列提供了一个值样本表示setter函数与其的对象类型.
+
+注意`search()`setter函数还有一些操作模式:
+
++ 基于一个`object<string, string>`调用`search(searchObj)`表示所有的参数和它们的值.
++ 调用`search(string)`将直接在URL上设置URL的参数为`q=String`.
++ 使用一个字符串和值调用`search(param, value)`来设置URL中一个特定的收缩参数(或者使用null调用来移除参数).
+
+使用任意一个这些setter函数并不意味着window.location将立即获得改变. `$location`服务会在Angular生命周期内运行,  所有的位置改变将积累在一起并在周期的后期应用. 所以可以随时作出改变, 一个借一个的, 而不用担心用户会看到一个不断闪烁和不断变更的URL的情况.
+

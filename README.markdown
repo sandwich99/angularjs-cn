@@ -132,7 +132,7 @@
 ##第7章 其他关注点
 
 + $location
-  + HTML5模式和Hashbang模式
++ HTML5模式和Hashbang模式
 + AngularJS模块方法
   + 主方法在哪?
   + 加载和依赖
