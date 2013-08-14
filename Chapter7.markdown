@@ -35,3 +35,7 @@
 		// an external library, like jQuery, then we would have to
 		$scope.$apply();
 	};
+	
+####用或者不用$apply?
+
+对于AngularJS开发者来说什么时候调用`$scope.$apply()`, 什么时候不能调用它是比较混乱的. 
