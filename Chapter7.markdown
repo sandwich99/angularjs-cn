@@ -141,7 +141,77 @@ Table 7-1 Functions on the $location service
 
 + 基于一个`object<string, string>`调用`search(searchObj)`表示所有的参数和它们的值.
 + 调用`search(string)`将直接在URL上设置URL的参数为`q=String`.
-+ 使用一个字符串和值调用`search(param, value)`来设置URL中一个特定的收缩参数(或者使用null调用来移除参数).
++ 使用一个字符串参数和值调用`search(param, value)`来设置URL中一个特定的搜索参数(或者使用null调用它来移除参数).
 
 使用任意一个这些setter函数并不意味着window.location将立即获得改变. `$location`服务会在Angular生命周期内运行,  所有的位置改变将积累在一起并在周期的后期应用. 所以可以随时作出改变, 一个借一个的, 而不用担心用户会看到一个不断闪烁和不断变更的URL的情况.
+
+## HTML5模式和Hashbang模式
+
+`$location`服务可以使用`$locationProvider`(就像AngularJS中的一切一样, 可以注入)来配置. 对它提供两个属性特别有兴趣, 分别是:
+
+**html5Mode**
+
+一个决定`$location`服务是否工作在HTML5模式中的布尔值.
+
+**hashPrefix**
+
+提个字符串值(实际上是一个字符)被用作Hashbang URLs(在Hashbang模式或者旧版浏览器的HTML模式中)的前缀. 默认情况下它为空, 所以Angular的hash就只是''. 如果`hashPrefix`设置为'!', 然后Angular就会使用我们所称作的Hashbang URLs(url紧随'!'之后).
+
+你可能会问, 这些模式是什么? 嗯, 假设你有一个超级棒的网站`www.superawesomewebsite.com`在使用AngularJS.
+
+比方说你有一个特定的路由(它有一些参数和一个hash), 比如`/foo?bar=123#baz`.
+
+在默认的Hashbang模式中(使用`hashPrefix`设置为'!'), 或者不支持HTML5模式的旧版浏览器中, 你的URL看起来像这样:
+
+	http://www.superawesomewebsite.com/#!/foo?bar=123#baz
+	
+然而在HTML5模式中, URL看起来会像这样:
+
+	http://www.superawesomewebsite.com/foo?bar=123#baz
+	
+在这两种情况下, `location.path()`就是`/foo`, `location.search()`就是`bar=123`, location.hash()`就是`baz`. 因此如果是这种情况, 为什么你不希望使用HTML5模式呢?
+
+Hashbang方法能够在所有的浏览器中无缝的工作, 并且只需要最少的配置. 你只需要设置`hashBang`前缀(默认情况下为!)并且你可以做到更好.
+
+HTML模式中, 在另一方面, 还可以通过使用HTML5的History API来访问浏览器的URL. 而`$location`服务能够足够只能的判断浏览器师傅支持HTML5模式, 必要的情况下还可以降级使用Hashbang方法, 因此你不需要担心额外的工作. 但是你不得不注意以下事情:
+
+**服务端配置**
+
+因为HTML5的链接看起来像你应用程序的所有其他URL, 你需要很小心的在服务端将你应用程序的所有链接路由连接到你的主HTML页面(最有可能的是,`index.html`). 例如, 如果你的应用是`superawesomewebsite.com`的登录页, 并且你的应用中有一个`/amazing?who=me`的路由, 然后URL在浏览其中显示为`http://www.superawesomewebsite.com/ amazing?who=me+`.
+
+当你浏览你的应用程序时, 默认情况下表现很好, 因为有HTML5 History API介入和负责很多事情. 但是如果你尝试直接浏览这个URL, 你的服务器会认为你是不是疯了, 因为在服务端它并不知道这个资源. 所以你必须确保所有指向`/amazing`的请求被充定向到`/index.html#!/amazing`.
+
+AngularJS将会以这种形式来在这一点注意这些事情. 它会检测路径的改变并冲顶像到我们所定义的AngularJS路由中.
+
+**Link rewriting(链接改写)**
+
+你可以很容易的像下面这样指定一个URL:
+
+	<a href="/some?foo=bar">link</a>
+	
+根据你是否使用的HTML5模式, AngularJS会注意分别重定向到`/some?foo=bar`或者`index.html#!/some?foo=bar`. 没有额外的步骤需要你处理. 很棒, 是不是?
+
+但是下面的链接形式像不会被改写, 并且浏览器将在这个页面上执行一个完整的重载:
+
++ a. 链接像下面这样包含一个`target`元素
+
+	<a href="/some/link" target="_self">link<a/>
+	
++ b. 链接到一个不用域名的绝对路径:
+
+	<a href="http://www.angularjs.org">link</a>
+	
+这里时不同的, 因为它是一个绝对的URL路径, 而前面的记录会使用现有的基础URL.
+
++ c. 链接基于一个不同的已经定义好的路径开始时:
+
+	<a href="/some-other-base/link">link</a>
+	
+**Relative Links(相对链接)**
+
+一定要检查所有的相对链接(相对路径), 图片, 脚本等等. 你必须在你主HTML文件的头部指定基本的参照URL(<base href="/my-base">), 或者你必须在每一处使用绝对URLs路径(以/开头的), 因为相对的URL将会使用文档中初试的绝对URL被解析为绝对的URL, 这往往不同于应用程序的根源.
+
+强烈建议从文档根源启用History API来运行Angular应用程序, 因为它要注意所有相对路径的问题.
+
+
 
