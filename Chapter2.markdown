@@ -203,7 +203,7 @@
         $scope.funding = { startingEstimate: 0 };
         
         $scope.computeNeeded = function(){
-            $scope.needed = $scope.startingEstimate * 10;
+            $scope.funding.needed = $scope.funding.startingEstimate * 10;
         };
         
     }
@@ -219,7 +219,7 @@
         $scope.funding = { startingEstimate: 0 };
         
         $scope.computeNeeded = function(){
-            $scope.needed = $scope.startingEstimate * 10;
+            $scope.funding.needed = $scope.funding.startingEstimate * 10;
         };
         
         $scope.$watch('funding.startingEstimate', computeNeeded);
@@ -242,15 +242,15 @@
 如果你的表单中有一组输入框, 那么你可以在这个表单上使用`ng-submit`指令给它指定一个提交表单时的回调函数. 我们可以让用户通过点击一个按钮请求帮助他们启动应用的方式来扩展上面的例子:
 ```html
     <form ng-submit="requestFunding()" ng-controller="StartUpController">
-        Starting: <input ng-change="computeNeeded()" ng-model="startingEstimate">
-        Recommendation: {{needed}}
+        Starting: <input ng-change="computeNeeded()" ng-model="funding.startingEstimate">
+        Recommendation: {{funding.needed}}
         <button>Fun my startup</button>
     </form>
 ```
 ```js
     function StartUpController($scope){
-        $scope.conputedNeeded = function(){
-            $scope.needed = $scope.startingEstimate * 10;  
+        $scope.computeNeeded = function(){
+            $scope.funding.needed = $scope.funding.startingEstimate * 10;  
         };
         
         $scope.requestFunding = function(){
@@ -267,16 +267,16 @@
 我们可以尝试最后一次扩展我们的计算器启动应用, 使用一个重置按钮用于将输入框的值重置为0.
 ```html
     <form ng-submit="requestFunding()" ng-controller="StartUpController">
-        Starting: <input ng-change="computeNeeded()" ng-model="StartingEstimate">
-        Recommendation: {{need}}
+        Starting: <input ng-change="computeNeeded()" ng-model="funding.StartingEstimate">
+        Recommendation: {{funding.needed}}
         <button>Fund my startup!</button>
-        <button ng-click="reset()">Reset</button>
+        <button type="button" ng-click="reset()">Reset</button>
     </form>
     
     function StartUpController($scope){
     
         $scope.computeNeeded = function(){
-            $scope.needed = $scope.startEstimate * 10;
+            $scope.funding.needed = $scope.funding.startingEstimate * 10;
         };
         
         $scope.requestFunding = function(){
@@ -284,7 +284,7 @@
         };
         
         $scope.reset = function(){
-            $scope.startEstimate = 0;
+            $scope.funding.startingEstimate = 0;
         }
     
     }
