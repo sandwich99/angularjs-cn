@@ -105,7 +105,7 @@
 
 我们正在讨论的这些方法从长远看来能够帮助你, 在上面的例子中, 我们在全局作用域中创建了`TextController`. 虽然这是一个很好的例子, 但是正确定义一个控制器的做法应该是将它作为模块的一部分, 它给你的应用程序部分提供了一个命名空间. 更新之后的代码看起来应该是下面这样.
 ```html
-    <html = ng-app="myApp">
+    <html  ng-app="myApp">
     <body ng-controller="TextController">
         <p>{{someText.message}}</p>
         
@@ -222,7 +222,7 @@
             $scope.funding.needed = $scope.funding.startingEstimate * 10;
         };
         
-        $scope.$watch('funding.startingEstimate', computeNeeded);
+        $scope.$watch('funding.startingEstimate',  $scope.computeNeeded);
         
     }
 ```
@@ -232,7 +232,7 @@
 
 然后, 由于每当我们的`funding.statingEstimates`改变时`funding.needed`都会自动更新, 我们可以像这样编写一个更简单的模板.
 ```html
-    <form cn-controller="StartUpController">
+    <form ng-controller="StartUpController">
         Starting: <input ng-model="funding.startEstimate">
         Recommendation: {{funding.needed}}
     </form>
