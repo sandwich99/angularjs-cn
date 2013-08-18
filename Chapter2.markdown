@@ -1328,7 +1328,7 @@ Angular带有几个适用于单页应用程序的不错的功能来自动增强`
 		<div>Age: <input type='number' ng-model='user.age' ng-maxlength='3'
 		ng-min='1'></div>
 		<div><button ng-click='addUser()'
-		ng-disabled='!addUserForm.$valid'>Submit</button>
+		ng-disabled='!addUserForm.$valid'>Submit</button></div>
 	</form>
 ```
 接下来是控制器:
