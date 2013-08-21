@@ -513,7 +513,7 @@ AngularJS将会自动的把前缀字符串过滤掉,然后仅仅处理真实JSON
 + 用户B意识到这点，然后诱导用户A访问用户B的个人主页
 + 主页上有一个特殊手工生成的图片连接地址，这个图片的的指向地址将会导致一次跨站请求伪造攻击,比如如下代码：
 
-    <img src="http://www.examplebank.com/xfer?from=UserA&amount=10000&to=UserB">
+    &lt;img src="http://www.examplebank.com/xfer?from=UserA&amount=10000&to=UserB"&gt;
 
 如果用户A的银行站点把授权信息保存在cookie里，且Cookie还没过期.当用户A打开用户B的站点时,就会导致非授权的用户A给用户B转账行为.
 
