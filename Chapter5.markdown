@@ -292,11 +292,17 @@ AngularJS对所有`$http`服务发起的请求和响应做一些基本的转换,
 
 表格5-1 一个信用卡reource
 Function                           Method   URL                                        Expected Return
+
 CreditCard.get({id: 11})           GET      /user/123/card/11                          Single JSON
+
 CreditCard.save({}, ccard)         POST     /user/123/card with post data “ccard”      Single JSON
+
 CreditCard.save({id: 11}, ccard)   POST     /user/123/card/11 with post data “ccard”   Single JSON
+
 CreditCard.query()                 GET      /user/123/card                             JSON Array
+
 CreditCard.remove({id: 11})        DELETE   /user/123/card/11                          Single JSON
+
 CreditCard.delete({id: 11})        DELETE   /user/123/card/11                          Single JSON
 
 让我们看一个信用卡resource使用的代码样例，这样可以让你理解起来觉得更浅显易懂.
