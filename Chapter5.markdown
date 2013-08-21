@@ -292,17 +292,11 @@ AngularJS对所有`$http`服务发起的请求和响应做一些基本的转换,
 
 表格5-1 一个信用卡reource
 Function                           Method   URL                                        Expected Return
-
 CreditCard.get({id: 11})           GET      /user/123/card/11                          Single JSON
-
 CreditCard.save({}, ccard)         POST     /user/123/card with post data “ccard”      Single JSON
-
 CreditCard.save({id: 11}, ccard)   POST     /user/123/card/11 with post data “ccard”   Single JSON
-
 CreditCard.query()                 GET      /user/123/card                             JSON Array
-
 CreditCard.remove({id: 11})        DELETE   /user/123/card/11                          Single JSON
-
 CreditCard.delete({id: 11})        DELETE   /user/123/card/11                          Single JSON
 
 让我们看一个信用卡resource使用的代码样例，这样可以让你理解起来觉得更浅显易懂.
@@ -480,7 +474,7 @@ ngResource依赖项是一个封装,它以Angular核心服务`$http`为基础.因
 
 当我们对服务器发送一个请求JSON数组数据的GET请求时(特别是当这些数据是敏感数据且需要登录验证或读取授权时),就会有一个不易察觉的JSON安全漏洞被暴露出来.
 
-当我们使用一个恶意站点时，站点可能会用<script>标签发起同样的请求而得到相同的信息.因为你仍旧是登录状态，恶意站点利用了你的验证信息而请求了JSON数据，并且得到了它.
+当我们使用一个恶意站点时，站点可能会用\<script\>标签发起同样的请求而得到相同的信息.因为你仍旧是登录状态，恶意站点利用了你的验证信息而请求了JSON数据，并且得到了它.
 
 你或许惊奇是如何做到的，因为信息仍旧在你客户端，服务器也得不到这个数组信息的引用.并且通常作为请求脚本返回响应JSO对象会导致一个执行错误，虽然数组是个列外.
 
@@ -500,7 +494,7 @@ AngulaJS中你可以两种方法都用来阻止这个漏洞.在你的应用中�
 
 通过前缀字符串设置，这个JSON响应就会变为
 
-    )]}',
+    ")]}'",
     ['one', 'two']
 
 AngularJS将会自动的把前缀字符串过滤掉,然后仅仅处理真实JSON数据.
@@ -515,7 +509,7 @@ AngularJS将会自动的把前缀字符串过滤掉,然后仅仅处理真实JSON
 
 考虑依稀下面这个跨站请求伪造攻击的案例:
 
-+ 用户A登录进他的银行帐号(http://www.examplebank.com)
++ 用户A登录进他的银行帐号(http\:\/\/www.examplebank.com/)
 + 用户B意识到这点，然后诱导用户A访问用户B的个人主页
 + 主页上有一个特殊手工生成的图片连接地址，这个图片的的指向地址将会导致一次跨站请求伪造攻击,比如如下代码：
 
@@ -528,12 +522,3 @@ AngularJS将会自动的把前缀字符串过滤掉,然后仅仅处理真实JSON
 在客户端，当发起XHR异步请求时,$http服务会从一个叫XSRF-TOKEN的cookie中读取令牌值，然后把它设置成X-XSRF-TOKEN头信息的值,因为只有你自己域的请求才能读取和设置这个令牌,你可以保证XHR请求只来自你自己的域.
 
 同时，服务器端代码也需要一点轻微的修改，以便于你收到你的第一个HTTP GET请求时就设置一个可读取的对话Cookie，这个对话Cookie键叫XSRF-TOKEN。后续客户端发往服务器的请求就可以通过对比请求头信息的令牌值和之前第一个请求设置的Cookie令牌值来达到验证的目的.当然,令牌必须是一个用户一个唯一的令牌值.这个令牌值必须在服务器端验证(以防止恶意脚本捏造假令牌).
-
-
-
-
-
-
-
-
-

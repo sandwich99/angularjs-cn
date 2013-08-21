@@ -5,7 +5,7 @@
 "AngularJS"中译本 -《AngularJS》
 
 + 作者: [Brad Green](https://github.com/bradlygreen)  [Shyam Seshadri](https://github.com/shyamseshadri)
-+ 译者: [basecss](mailto:270842722@qq.com)
++ 译者: [basecss](mailto:270842722@qq.com) [dhcn](https://github.com/dhcn)
 
 **更少的代码, 更多的乐趣, 增强结构化Web应用程序的生产力**
 
@@ -121,18 +121,18 @@
 
 + 指令和HTML验证
 + API预览
-  + 命名指令
-  + 定义指令对象
-  + 编译和链接
+  + 为你的指令命名
+  + 指令定义对象
+  + 编译和链接功能
   + 作用域
-  + 操作DO元素
+  + 操作DOM元素
   + 控制器
 + 小结
 
-##第7章 其他关注
+##第7章 其他关注点
 
 + $location
-  + HTML5模式和Hashbang模式
++ HTML5模式和Hashbang模式
 + AngularJS模块方法
   + 主方法在哪?
   + 加载和依赖

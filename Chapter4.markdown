@@ -40,7 +40,7 @@ Figure 4-1. Guthub: A simple recipe management application
 
 任何类型的业务逻辑和行为都不应该进入模板中; 这些信息应该被限制在控制器中. 保持模板的简单可以适当的分离关注点, 并且可以确保你只使用单元测试的情况下就能够测试大多数的代码. 而模板必须使用场景测试的方式来测试.
 
-但是, 你可能会问, 在哪里操作DOM呢? DOM操作并不会真正进入到控制器和模板中. 它会存在于Angular的指令中(有时候也可以通过服务来处理, 这样可以避免重复的DOM操作代码). 我们会在我们的Github的示例文件中涵盖一个这样的例子.
+但是, 你可能会问, 在哪里操作DOM呢? DOM操作并不会真正进入到控制器和模板中. 它会存在于Angular的指令中(有时候也可以通过服务来处理, 这样可以避免重复的DOM操作代码). 我们会在我们的GutHub的示例文件中涵盖一个这样的例子.
 
 废话少说, 让我们来深入探讨一下它们.
 
@@ -58,7 +58,7 @@ Figure 4-1. Guthub: A simple recipe management application
 + 一个成份数组, 每个成分的数量, 单位和名称
 
 就是这样. 非常简单. 应用程序的中一切都基于这个简单的模型. 下面是一个让你食用的示例菜谱(如图4-1一样):
-
+```js
 	{
 		'id': '1',
 		'title': 'Cookies',
@@ -77,7 +77,7 @@ Figure 4-1. Guthub: A simple recipe management application
 			'3. Enjoy warm cookies\n' +
 			'4. Learn how to bake cookies from somewhere else'
 	}
-
+```
 下面我们将会看到如何基于这个简单的模型构建更复杂的UI特性.
 
 ##控制器, 指令和服务
@@ -85,7 +85,7 @@ Figure 4-1. Guthub: A simple recipe management application
 现在我们终于可以得到这个让我们牙齿都咬到肉里面去的美食应用程序了. 首先, 我们来看看代码中的指令和服务, 以及讨论以下它们都是做什么的, 然后我们我们会看看这个应用程序需要的多个控制器.
 
 ###服务
-
+```js
 	//this file is app/scripts/services/services.js
 
 	var services = angular.module('guthub.services', ['ngResource']);
@@ -117,12 +117,12 @@ Figure 4-1. Guthub: A simple recipe management application
 			return delay.promise;
 		};
 	}]);
-
+```
 首先让我们来看看我们的服务. 在33页的"使用模块组织依赖"小节中已经涉及到了服务相关的知识. 这里, 我们将会更深一点挖掘服务相关的信息.
 
 在这个文件中, 我们实例化了三个AngularJS服务.
 
-有一个菜谱服务, 它返回我们所调用的Angular Resource. 这些是RESETful资源, 它指向一个RESTful服务器. Angular Resource封装了低层的`$http`服务, 因此你可以在你的代码中只处理对象.
+有一个菜谱服务, 它返回我们所调用的Angular Resource. 这些是RESTful资源, 它指向一个RESTful服务器. Angular Resource封装了低层的`$http`服务, 因此你可以在你的代码中只处理对象.
 
 注意单独的那行代码 - `return $resource` - (当然, 依赖于`guthub.services`模型), 现在我们可以将`recipe`作为参数传递给任意的控制器中, 它将会注入到控制器中. 此外, 每个菜谱对象都内置的有以下几个方法:
 
@@ -147,12 +147,12 @@ Figure 4-1. Guthub: A simple recipe management application
 比方说我们有一个recipe对象, 其中存储了必要的信息, 并且包含一个id.
 
 然后, 我们只需要像下面这样做就可以保存它:
-
+```js
 	//Assuming existingRecipeObj has all the necessary fields,
 	//including id(say 13)
 	var recipe = new Recipe(existingRecipeObj);
 	recipe.$save();
-
+```
 这将会触发一个POST请求到`/recipe/13`.
 
 `@id`用于告诉它, 这里的id字段取自它的对象中同时用于作为id参数. 这是一个附加的便利操作, 可以节省几行代码.
@@ -170,6 +170,7 @@ Figure 4-1. Guthub: A simple recipe management application
 >
 >让我们使用一个例子来展示它的优势, 假设我们需要获取一个用户的当前配置:
 
+```js
 	var currentProfile = null;
 	var username = 'something';
 
@@ -179,7 +180,7 @@ Figure 4-1. Guthub: A simple recipe management application
 				currentProfile = profiles.currentProfile;	
 		});	
 	});
-
+```
 > 对于这种做法这里有一些问题:
 >
 > 1. 对于最后产生的代码, 缩进是一个噩梦, 特别是如果你要链接多个调用时.
@@ -190,6 +191,7 @@ Figure 4-1. Guthub: A simple recipe management application
 >
 > Promises解决了这些问题. 在我们进入它是如何解决这些问题之前, 先让我们来看看一个使用promise对同一问题的实现.
 
+```js
 	var currentProfile = fetchServerConfig().then(function(serverConfig){
 		return fetchUserProfiles(serverConfig.USER_PROFILES, username);
 	}).then(function{
@@ -198,7 +200,7 @@ Figure 4-1. Guthub: A simple recipe management application
 		// Handle errors in either fetchServerConfig or
 		// fetchUserProfile here
 	});
-
+```
 > 注意其优势:
 >
 > 1. 你可以链接函数调用, 因此你不会产生缩进带来的噩梦.
@@ -225,7 +227,7 @@ Figure 4-1. Guthub: A simple recipe management application
 这个`focus`指令用于确保指定的文本域(或者元素)拥有焦点.
 
 让我们来看一下代码:
-
+```js
 	// This file is app/scripts/directives/directives.js
 
 	var directive = angular.module('guthub.directives', []);
@@ -253,7 +255,7 @@ Figure 4-1. Guthub: A simple recipe management application
 			}
 		};
 	});
-
+```
 上面所述的指令返回一个对象带有一个单一的属性, link. 我们将在第六章深入讨论你可以如何创建你自己的指令, 但是现在, 你应该知道下面的所有事情:
 
 1. 指令通过两个步骤处理. 在第一步中(编译阶段), 所有的指令都被附加到一个被查找到的DOM元素上, 然后处理它. 任何DOM操作否发生在编译阶段(步骤中). 在这个阶段结束时, 生成一个连接函数.
@@ -281,15 +283,15 @@ Figure 4-1. Guthub: A simple recipe management application
 ###控制器
 
 随着指令和服务的覆盖, 我们终于可以进入控制器部分了, 我们有五个控制器. 所有的这些控制器都在一个单独的文件中(`app/scripts/controllers/controllers.js`), 但是我们会一个个来了解它们. 让我们来看第一个控制器, 这是一个列表控制器, 负责显示系统中所有的食谱列表.
-
+```js
 	app.controller('ListCtrl', ['scope', 'recipes', function($scope, recipes){
 		$scope.recipes = recipes;
 	}]);
-
+```
 注意列表控制器中最重要的一个事情: 在这个控制器中, 它并没有连接到服务器和获取是食谱. 相反, 它只是使用已经取得的食谱列表. 你可能不知道它是如何工作的. 你可能会使用路由一节来回答, 因为它有一个我们之前看到`MultiRecipeLoader`. 你只需要在脑海里记住它.
 
 在我们提到的列表控制器下, 其他的控制器都与之非常相似, 但我们仍然会逐步指出它们有趣的地方:
-
+```js
 	app.controller('ViewCtrl', ['$scope', '$location', 'recipe', function($scope, $location, recipe){
 			$scope.recipe = recipe;
 
@@ -297,11 +299,11 @@ Figure 4-1. Guthub: A simple recipe management application
 				$location.path('/edit/' + recipe.id);
 			};
 	}]);
-
+```
 这个视图控制器中有趣的部分是其编辑函数公开在作用域中. 而不是显示和隐藏字段或者其他类似的东西, 这个控制器依赖于AngularJS来处理繁重的任务(你应该这么做)! 这个编辑函数简单的改变URL并跳转到编辑食谱的部分, 你可以看见, AngularJS并没有处理剩下的工作. AngularJS识别已经改变的URL并加载响应的视图(这是与我们编辑模式中相同的食谱部分). 来看一看!
 
 接下来, 让我们来看看编辑控制器:
-
+```js
 	app.controller('EditCtrl', ['$scope', '$location', 'recipe', function($scope, $location, recipe){
 		$scope.recipe = recipe;
 
@@ -316,21 +318,21 @@ Figure 4-1. Guthub: A simple recipe management application
 			$location.path('/');
 		};
 	}]);
-
+```
 那么在这个暴露在作用域中的编辑控制器中新的`save`和`remove`方法有什么.
 
 那么你希望作用域内的`save`函数做什么. 它保存当前食谱, 并且一旦保存好, 它就在屏幕中将用户重定向到相同的食谱. 回调函数是非常有用的, 一旦你完成任务的情况下执行或者处理一些行为.
 
-有两种方式可以在这里保存食谱. 一种是如代码所示, 通过执行$scope.recipe.$save()方法. 这只是可能, 因为`recipe`十一个通过开头部分的RecipeLoader返回的资源对象.
+有两种方式可以在这里保存食谱. 一种是如代码所示, 通过执行$scope.recipe.$save()方法. 这只是可能, 因为`recipe`是一个通过开头部分的RecipeLoader返回的资源对象.
 
 另外, 你可以像这样来保存食谱:
-
+```js
 	Recipe.save(recipe);
-
+```
 `remove`函数也是很简单的, 在这里它会从作用域中移除食谱, 同时将用户重定向到主菜单页. 请注意, 它并没有真正的从我们的服务器上删除它, 尽管它很再做出额外的调用.
 
 接下来, 我们来看看New控制器:
-
+```js
 	app.controller('NewCtrl', ['$scope', '$location', 'Recipe', function($scope, $location, Recipe){
 		$scope.recipe = new Recipe({
 			ingredents: [{}]
@@ -342,11 +344,11 @@ Figure 4-1. Guthub: A simple recipe management application
 			});
 		};
 	}]);
-
+```
 New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个控制器作为一个单一的控制器来做一个练习. 唯一的主要不同是New控制器会在第一步创建一个新的食谱(这也是一个资源, 因此它也有一个`save`函数).其他的一切都保持不变.
 
 最后, 我们还有一个Ingredients控制器. 这是一个特殊的控制器, 在我们深入了解它为什么或者如何特殊之前, 先来看一看它:
-
+```js
 	app.controller('Ingredients', ['$scope', function($scope){
 		$scope.addIngredients = function(){
 			var ingredients = $scope.recipe.ingredients;
@@ -357,13 +359,13 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 			$scope.recipe.ingredients.splice(index, 1);
 		};
 	}]);
-
+```
 到目前为止, 我们看到的所有其他控制器斗鱼UI视图上的相关部分联系着. 但是这个Ingredients控制器是特殊的. 它是一个子控制器, 用于在编辑页面封装特定的恭喜而不需要在外层(父级)来处理. 有趣的是要注意, 由于它是一个字控制器, 继承自作用域中的父控制器(在这里就是Edit/New控制器). 因此, 它可以访问来自父控制器的`$scope.recipe`.
 
 这个控制器本身并没有什么有趣或者独特的地方. 它只是添加一个新的成份到现有的食谱成份数组中, 或者从食谱的成份列表中删除一个特定的成份.
 
 那么现在, 我们就来完成最后的控制器. 唯一的JavaScript代码块展示了如何设置路由:
-
+```js
 	// This file is app/scripts/controllers/controllers.js
 
 	var app = angular.module('guthub', ['guthub.directives', 'guthub.services']);
@@ -399,7 +401,7 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 					templateUrl: '/views/recipeForm.html'
 			}).otherwise({redirectTo: '/'});
 	}]);
-
+```
 正如我们所承诺的, 我们终于到了解析函数使用的地方. 前面的代码设置Guthub AngularJS模块, 路由以及参与应用程序的模板.
 
 它挂接到我们已经创建的指令和服务上, 然后指定不同的路由指向应用程序的不同地方.
@@ -421,7 +423,7 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 ##模板
 
 让我们首先来看看最外层的主模板, 这里就是`index.html`. 这是我们单页应用程序的基础, 同时所有其他的视图也会装在到这个模板的上下文中:
-
+```html
 	<!DOCTYPE html>
 	<html lang="en" ng-app="guthub">
 	<head>
@@ -454,7 +456,7 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 		</div>
 	</body>
 	</html>
-
+```
 注意前面的模板中有5个有趣的元素, 其中大部分你在第2章中都已经见过了. 让我们逐个来看看它们:
 
 `ng-app`
@@ -480,7 +482,7 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 有一件引人注目的事情是这里缺少`ng-controller`标签. 大部分应用程序某种程度上都需要一个与外部模板关联的MainController. 其最常见的位置是在body标签上. 在这种情况下, 我们并没有使用它, 因为完整的外部模板没有AngularJS内容需要引用到一个作用域.
 
 现在我们来看看与每个控制器关联的单独的模板, 就从"食谱列表"模板开始:
-
+```html
 	<!-- File is chapter4/guthub/app/view/list.html -->
 	<h3>Recipe List</h3>
 	<ul class="recipes">
@@ -488,7 +490,7 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 			<div><a ng-href="/#/view/{{recipe.id}}">{{recipe.title}}</a></div>
 		</li>
 	</ul>
-
+```
 是的, 它是一个非常无聊(普通)的模板. 这里只有两个有趣的点. 第一个是非常标准的`ng-repeat`标签用法. 他会获得作用域内的所有食谱并重复检出它们.
 
 第二个是`ng-href`标签的用法而不是`href`属性. 这是一个在AngularJS加载期间纯粹无效的空白链接. `ng-href`会确保任何时候都不会给用户呈现一个畸形的链接. 总是会使用它在任何时候使你的URLs都是动态的而不是静态的.
@@ -496,7 +498,7 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 当然, 你可能感到奇怪: 控制器在哪里? 这里没有`ng-controller`定义, 也确实没有Main Controller定义. 这是路由映射发挥的作用. 如果你还记得(或者往前翻几页), `/`路由会重定向到列表模板并且带有与之关联的ListController. 因此, 当引用任何变量或者类似的东西时, 它都在List Controller作用域内部.
 
 现在我们来看一些有更多实质内容的东西: 视图形式.
-
+```html
 	<!-- File is chapter4/guthub/app/views/viewRecipe.html -->
 	<h2>{{recipe.title}}</h2>
 
@@ -520,7 +522,7 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 			<button class="btn btn-primary">Edit</button>
 		</div>
 	</form>
-
+```
 这是另一个不错的, 很小的包含模板. 我们将提醒你注意三件事, 虽然不会按照它们所出现的顺序.
 
 第一个就是非常标准的`ng-repeat`. 食谱(recipes)再次出现在View Controller作用域中, 这是用过在页面现实给用户之前通过`resolve`函数加载的. 这确保用户查看它时也面不是一个破碎的, 未加载的状态.
@@ -531,8 +533,10 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 
 最后一个需要注意的时表单上的`ng-submit`指令. 这个指令规定在表单被提交的情况下调用`scope`中的`edit()`函数. 当任何没有关联明确函数的按钮被点击时机会提交表单(这种情况下便是Edit按钮). 同样, AngularJS足够智能的在作用域中(从模块,路由,控制器中)在正确的时间里引用和调用正确的方法.
 
-现在我们可以来看看我们最后的模板(可能目前为止最复杂的一个), 食谱表单模板:
+> **上面这段解释与原书代码有一些差别, 读者自行理解. 原书作者暂未给出解答.**
 
+现在我们可以来看看我们最后的模板(可能目前为止最复杂的一个), 食谱表单模板:
+```html
 	<!-- file is chapter4/guthub/app/views/recipeForm.html -->
 	<h2>Edit Recipe</h2>
 	<form name="recipeForm" ng-submit="save()" class="form-horizontal">
@@ -577,7 +581,7 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 			<button type="button" ng-click="remove()" ng-show="!recipe.id" class="btn">Delete</button>
 		</div>
 	</form>
-
+```
 不要惊慌. 它看起来像很多代码, 并且它时一个很长的代码, 但是如果你认真研究以下它, 你会发现它并不是非常复杂. 事实上, 其中很多都是很简单的, 比如重复的显示可编辑输入字段用于编辑食谱的模板:
 
 + `focus`指令被添加到第一个输入字段上(`title`输入字段). 这确保当用户导航到这个页面时, 标题字段会自动聚焦, 并且用户可以立即开始输入标题信息.
@@ -597,12 +601,12 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 为此, 我们先跳到保存按钮部分. 注意它上面有一个`ng-disabled`指令, 这换言之就是`recipeForm.$invalid`. 这个`recipeForm`是我们已经声明的表单名称. AngularJS增加了一些特殊的变量(`$valid`和`$invalid`只是其中两个)允许你控制表单的元素. AngularJS会查找到所有的必填元素并更新所对应的特殊变量. 因此如果我们的Recipe Title为空, `recipeForm.$invalid`就会被这只为true(`$valid`就为false), 同时我们的保存(Save)按钮就会立刻被禁用.
 
 我们还可以给一个文本输入框设置最大和最小长度(输入长度), 以及一个用于验证一个输入字段的正则表达式模式. 另外, 这里还有只在满足特定条件时用于显示特定错误消息的高级用法. 让我们使用一个很小的分支例子来看看:
-
+```html
 	<form name="myForm">
 		User name: <input type="text" name="userName" ng-model="user.name" ng-minlength="3">
 		<span class="error" ng-show="myForm.userName.$error.minlength">Too Short!</span>
 	</form>
-
+```
 在前面的这个例子中, 我们添加了一要求: 用户名至少是三个字符(通过使用`ng-minlength`指令). 现在, 表单范围内会关心每个命名输入框的填充形式--在这个例子中我们只有一个`userName`--其中每个输入框都会有一个`$error`对象(这里具体的还包括什么样的错误或者没有错误: `required`, `minlength`, `maclength`或者模式)和一个`$valid`标签来表示输入框本身是否有效.
 
 我们可以利用这个来选择性的将错误信息显示给用户, 这根据不用的输入错误类型来显示, 正如我们上面的实例所示.
@@ -613,3 +617,170 @@ New控制器几乎与Edit控制器完全一样. 实际上, 你可以结合两个
 
 ##测试
 
+随着控制器部分, 我们已经推迟向你显示测试部分了, 但你知道它会即将到来, 不是吗? 在这一节, 我们将会涵盖你已经编写部分的代码测试, 以及涉及你要如何编写它们.
+
+###单元测试
+
+第一个, 也是非常重要的一种测试是单元测试. 对于控制器(指令和服务)的测试你已经开发和编写的正确的结构, 并且你可能会想到它们会做什么.
+
+在我们深入到各个单元测试之前, 让我们围绕所有我们的控制器单元测试来看看测试装置:
+```js
+	describle('Controllers', function() {
+		var $scope, ctrl;
+		//you need to include your module in a test
+		beforeEach(module('guthub'));
+		beforeEach(function() {
+			this.addMatchers({
+				toEqualData: function(expected) {
+					return angular.equals(this.actual, expected);
+				}
+			});
+		});
+
+		describle('ListCtrl', function() {....});
+		// Other controller describles here as well
+	});
+```
+这个测试装置(我们仍然使用Jasmine的行为方式来编写这些测试)做了几件事情:
+
+1. 创建一个全局(至少对于这个测试规范是这个目的)可访问的作用域和控制器, 所以我们不用担心每个控制器会创建一个新的变量.
+
+2. 初始化我们应用程序所用的模块(在这里是Guthub).
+
+3. 添加一个我们称之为`equalData`的特殊的匹配器. 这基本上允许我们在资源对象(就像食谱)通过`$resource`服务和调用RESTful来执行断言(测试判断).
+
+> 记得在任何我们处理在`ngRsource`上返回对象的断言时添加一个称为`equalData`特殊匹配器. 这是因为`ngRsource`返回对象还有额外的方法在它们失败时默认希望调用equal方法.
+
+这个装置到此为止, 让我们来看看List Controller的单元测试:
+```js
+	describle('ListCtrl', function(){
+		var mockBackend, recipe;
+		// _$httpBackend_ is the same as $httpBackend. Only written this way to diiferentiate between injected variables and local variables
+		breforeEach(inject(function($rootScope, $controller, _$httpBackend_, Recipe) {
+			recipe = Recipe;
+			mockBackend = _$httpBackend_;
+			$scope = $rootScope.$new();
+			ctrl = $controller('ListCtrl', {
+				$scope: $scope,
+				recipes: [1, 2, 3]
+			});
+		}));
+
+		it('should have list of recipes', function() {
+			expect($scope.recipes).toEqual([1, 2, 3]);
+		});
+	});
+```
+记住这个List Controller只是我们最简单的控制器之一. 这个控制器的构造器只是接受一个食谱列表并将它保存到作用域中. 你可以编写一个测试给它, 但它似乎有一点不合理(我们还是这么做了, 因为这个测试很不错).
+
+相反, 更有趣的是MulyiRecipeLoader服务方面. 它负责从服务器上获取食谱列表并将它作为一个参数传递(当通过`$route`服务正确的连接时).
+```js
+	describe('MultiRecipeLoader', function() {
+		var mockBackend, recipe, loader;
+		// _$httpBackend_ is the same as $httpBackend. Only written this way to differentiate between injected variables and local variables. 
+
+		beforeEach(inject(function(_$httpBackend_, Recipe, MultiRecipeLoader) {
+			recipe = Recipe;
+			mockBackend = _$httpBackend_;
+			loader = MultiRecipeLoader;
+		}));
+
+		it('should load list of recipes', function() { 
+			mockBackend.expectGET('/recipes').respond([{id: 1}, {id: 2}]);
+
+			var recipes;
+
+			var promise = loader(); promise.then(function(rec) {
+				recipes = rec;
+			});
+
+			expect(recipes).toBeUndefined( ) ;
+
+			mockBackend. f lush() ;
+
+			expect(recipes).toEqualData([{id: 1}, {id: 2}]); });
+	});
+	// Other controller describes here as well
+```
+在我们的测试中, 我们通过挂接到一个模拟的`HttpBackend`来测试MultiRecipeLoader. 这来自于测试运行时所包含的`angular-mocks.js`文件. 只需将它注入到你的`beforeEach`方法中就足以让你设置预期目的. 接下来, 我们进行了一个更有意义的测试, 我们期望设置一个服务器的GET请求来获取recipes, 浙江返回一个简单的数组对象. 然后使用我们新的自定义的匹配器来确保正确的返回数据. 注意在模拟backend中的`flush()`调用, 这将告诉模拟Backend从服务器返回响应. 你可以使用这个机制来测试控制流程和查看你的应用程序在服务器返回一个响应之前和之后是如何处理的.
+
+我们将跳过View Controller, 因为它除了在作用域中添加一个`edit()`方法之外基于与List Controller一模一样. 这是非常简单的测试, 你可以在你的测试中注入`$location`并检查它的值.
+
+现在让我们跳到Edit Controller, 其中有两个有趣的点我们进行单元测试. 一个是类似我们之前看到过的`resolve`函数, 并且可以以同样的方式测试. 相反, 我们现在想看看我们可以如和测试`save()`和`remove()`方法. 让我们来看看对于它们的测试(假设我们的测试工具来自于前面的例子):
+```js
+	describle('EditController', function() {
+		var mockBackend, location;
+		beforeEach(inject($rootScope, $controller, _$httpBackend_, $location, Recipe){
+			mockBackend = _$httpBackend_;
+			location = $location;
+			$scope = $rootScope.$new();
+
+			ctrl = $controller('EditCtrl', {
+				$scope: $scope,
+				$location: $location,
+				recipe: new Recipe({id: 1, title: 'Recipe'});
+			});
+		}));
+
+		it('should save the recipe', function(){
+			mockBackend.expectPOST('/recipes/1', {id: 1, title: 'Recipe'}).respond({id: 2});
+
+			// Set it to something else to ensure it is changed during the test
+			location.path('test');
+
+			$scope.save();
+			expect(location.path()).toEqual('/test');
+
+			mockBackend.flush();
+
+			expect(location.path()).toEqual('/view/2');
+		});
+
+		it('should remove the recipe', function(){
+			expect($scope.recipe).toBeTruthy();
+			location.path('test');
+
+			$scope.remove();
+
+			expect($scope.recipe).toBeUndefined();
+			expect(location.path()).toEqual('/');
+		});
+	});
+```
+在第一个测试用, 我们测试了`save()`函数. 特别是, 我们确保在我们的对象保存时首先创建一个到服务器的POST请求, 然后, 一旦服务器响应, 地址就改变到新的持久对象的视图食谱页面.
+
+第二个测试更简单. 我们进行了简单的检测以确保在作用域中调用`remove()`方法的时候移除当前食谱, 然后重定向到用户主页. 这可以很容易通过注入`$location`服务到我们的测试中并使用它.
+
+其余的针对控制器的单元测试遵循非常相似的模式, 因此在这里我们跳过它们. 在他们的底层中, 这些单元测试依赖于一些事情:
+
++ 确保控制器(或者更可能是作用域)在结束初始化时达到正确的状态
+
++ 确认经行正确的服务器调用, 以及通过作用域在服务器调用期间和完成后去的正确的状态(通过在单元测试中使用我们的模拟后端服务)
+
++ 利用AngularJS的依赖注入框架着手处理元素以及控制器对象用于确保控制器会设置正确的状态.
+
+###脚本测试
+
+一旦我们对单元测试很满意, 我们可能禁不住的往后靠一下, 抽根雪茄, 收工. 但是AngularJS开发者不会这么做, 直到他们完成了他们的脚本测试(场景测试). 虽然单元测试确保我们的每一块JS代码都按照预期工作, 我们也要确保模板加载, 并正确的挂接到控制器上, 以及在模板重点击做正确的事情.
+
+这正是AngularJS带给你的脚本测试(场景测试), 它允许你做以下事情:
+
++ 加载你的应用程序
++ 浏览一个特定的页面
++ 随意的点击周围和输入文本
++ 确保发生正确的事情
+
+所以, 脚本测试如何在我们的"食谱列表"页面工作? 首先, 在我们开始实际的测试之前, 我们需要做一些基础工作.
+
+对于该脚本测试工作, 我们需要一个工作的Web服务器以准备从Guthub应用上接受请求, 同时将允许我们从它上面存储和获取一个食谱列表. 随意的更改代码以使用内存中的食谱列表(移除`$resource`食谱并只是将它转换为一个JSON对象), 或者复用和修改我们前面章节向你展示的Web服务器, 或者使用Yeoman!
+
+一旦我们有了一个服务器并运行起来, 同时服务于我们的应用程序, 然后我们就可以编写和运行下面的测试:
+```js
+	describle('Guthub App', function(){
+		it('should show a list of recipes', function(){
+			browser().navigateTo('/index.html');
+			//Our Default Guthub recipes list has two recipes
+			expect(repeater('.recipes li').count()).toEqual(2);
+		});
+	});
+```
