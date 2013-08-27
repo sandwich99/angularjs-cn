@@ -19,7 +19,7 @@
 
 在我们开始实际代码之前，我们不得不做出一个设计决策：我们的这个组件的外观显示和交互设计应该是什么样子,假设我们想定义的的日期选择器在HTML里面使用像以下代码这样:
 
-    &lt;input datepicker ng-model="currentDate" select="updateMyText(date)" &gt; &lt;/input &gt;
+    <input datepicker ng-model="currentDate" select="updateMyText(date)" ></input>
 
 
 
