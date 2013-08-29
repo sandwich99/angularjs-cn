@@ -213,5 +213,178 @@ AngularJS将会以这种形式来在这一点注意这些事情. 它会检测路
 
 强烈建议从文档根源启用History API来运行Angular应用程序, 因为它要注意所有相对路径的问题.
 
+## AngularJS模块方法
 
+AngularJS模块负责定义如何引导你的应用程序。它还声明定义了应用程序片段。接下来让我们一起看看它是如何实现这一点的。
 
+### 主方法在哪？
+
+如果你来自于Java，甚至是Python编程语言社区，你可能会疑惑，AngularJS中的主方法在哪？你知道的，主方法会引导一切，并且它是首先会个执行的东西？它会将JavaScript函数和实例以及所有的事情联系在一起，然后再通知你的应用程序去运行？
+
+但是在AngularJS中没有。替代的是Angular中的模块的概念。模块允许我们声明指定我们应用程序的依赖，以及应用程序的引导是如何发生的。使用这种方式的原因时多方面的。
+
+1. 首先是**声明**。这意味以这种方式编写代码更容易编写和理解。就像阅读英语一样！
+2. 它是**模块化**的。它会迫使你去思考如何定义你的组件和依赖，并让它们很明确。
+3. 它还允许**简单测试**。在你的单元测试中，你可以选择性的拉去模块来测试，以规避代码中不可以测试的部分。同时在你的场景测试中，你还可以加载附加的模块，这样可以结合某些组件一起工作让工作变得更容易。
+
+那么接下来，先让我们看看你要如何使用一个已经定义好的模块，然后再来看看我们如何声明一个模块。
+
+比方说我们有一个模块，实际上，我们的应用程序中有一个名为"MyAwesoneApp"的模块。在我的HTML中，我可以只添加下面的\<html\>标签(从技术上将，也可以是任何其他的标签)。
+
+	<html ng-app="MyAwesomeApp">
+
+这里的`ng-app`指令会告诉你的AngularJS可以使用`MyAwesomeApp`模块来引导你的应用程序。
+
+那么，这个模块是如何定义的呢？嗯，首先我们建议你分你的服务，指令和过滤器模块。然后在你的主模块中，你就可以只声明你所依赖的其他模块(与我们在第4章中使用RequireJS的例子一样)。
+
+这种方式让你管理模块变得更容易，因为它们都是很好的完整的代码块。每个模块有且仅有一个职责。这样就允许你在测试中只载入你所关心的模块，从而减少了初始化这些模块的数量。这样，测试就可以变得更小并且只会关心重点。
+
+### 加载和依赖
+
+模块的加载发生在两个不同的阶段，并且它们都有对应的函数。它们分别是配置和运行块(阶段)：
+
+**配置块**
+
+AngularJS会在这个阶段挂接和注册所有的供应商(提供的模块)。这是因为，只有供应商和常量才能够注入到配置块中。服务能不能被初始化，并不能被注入到这个阶段。
+
+**运行块**
+
+运行快用于快速启动你的应用程序，并且在注入任务完成创建之后开始执行应用程序。从此刻开始会阻止接下来的系统配置，只有实例和常量可以注入到运行块中。在AngularJS中，运行块是最接近你想要寻找的主方法的东西。
+
+### 快捷方法
+
+那么可以用模块做什么呢？我们可以实例化控制器，指令，过滤器和服务，但是模块类允许你做更多的事情，正如表7-2所示：
+
+Table 7-2 模块的快捷方法
+
+<table>
+	<thead>
+		<tr>
+			<th>API方法</th>
+			<th>描述</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>config(configFn)</td>
+			<td>模块加载时使用这个方法注册模块需要做的工作。</td>
+		</tr>
+		<tr>
+			<td>constant(name, object)</td>
+			<td>这个首先发生，因此你可以在这里声明所有的常量`app-wide`，和声明所有可用的配置(也就是列表中的第一个方法)以及方法实例(从这里获取所有的方法，如控制器，服务等等).</td>
+		</tr>
+		<tr>
+			<td>controller(name, constructor)</td>
+			<td>我们已经看过了很多控制器的例子，它主要用于设置一个控制器。</td>
+		</tr>
+		<tr>
+			<td>directive(name, directiveFactory)</td>
+			<td>正如第6章所讨论的，它允许你为应用程序创建指令。</td>
+		</tr>
+		<tr>
+			<td>filter(name, filterFactory)</td>
+			<td>允许你创建命名AngularJS过滤器，正如第6章所讨论的。</td>
+		</tr>
+		<tr>
+			<td>run(initializationFn)</td>
+			<td>使用这个方法在注入设置完成时处理你要执行的工作，也就是将你的应用程序展示给用户之前。</td>
+		</tr>
+		<tr>
+			<td>value(name, object)</td>
+			<td>允许跨应用程序注入值。</td>
+		</tr>
+		<tr>
+			<td>service(name, serviceFactory)</td>
+			<td>下一节中讨论。</td>
+		</tr>
+		<tr>
+			<td>factory(name, factoryFn)</td>
+			<td>下一节中讨论。</td>
+		</tr>
+		<tr>
+			<td>provider(name, providerFn)</td>
+			<td>下一节中讨论。</td>
+		</tr>
+	</tbody>
+</table>
+
+你可能意识到，在前面的表格中我们省略了三个特定API-Factory，Provider，和Service的详细信息。还有一个原因是：这三者之间的用法很容易混肴，因此我们使用一个简单的例子来更好的说明一下什么时候(以及如何)使用它们每一个。
+
+**The Factory**
+
+Factory API可以用来在每当我们有一个类或者对象需要一定逻辑或者参数之前才能初始化的时候调用。一个Factory就是一个函数，这个函数的职责是创建一个值(或者一个对象)。让我们来看一个例子，greeter函数需要和它的salutation参数一起初始化：
+
+	function Greeter(salutation) {
+		this.greet = function(name) {
+			return salutation + ' ' + name;
+		}
+	}
+
+greeter工厂方法(它就是一个工厂函数或者说构造函数)看起来就像这样：
+
+	myApp.factory('greeter', function(salut) {
+		return new Greeter(salut);
+	});
+
+然后可以像这样调用：
+
+	var myGreeter = greeter('Halo');
+
+**The Service**
+
+什么时服务？嗯，一个Factory和一个Service之间的不同就是Factory方法会调用传递给它的函数并返回一个值。而Service方法会在传递给它的控制器方法上调用"new"操作符并返回调用结果。
+
+因此前面的greeter工厂可以替换为如下所示的geeter服务：
+
+	myApp.service('greeter', Greeter);
+
+那么我每次访问一个greeter实例时，AngularJS都会调用`new Greeter()`并返回调用结果。
+
+**The Provider**
+
+这是最复杂的(大部分的都是可配置，很的)一部分。Provider结合了Factory和Service，同时它会在注入系统完全到位之前抛出Provider函数能够进行配置的信息(也就是说，它就发生在配置块中)。
+
+让我们来看看使用Provider修改之后的greeter Service，它看起来可能是下面这样的：
+
+	myApp.provider('greeter', function() {
+		var salutation = 'Hello';
+		this.setSalutation = function(s){
+			salutation = s;
+		}
+
+		function Greeter(a) {
+			this.greet = function() {
+				return salutation + ' ' + a;
+			}
+		}
+
+		this.$get = function(a) {
+			return new Greeter(a);
+		}
+	});
+
+这就允许我们在运行时(例如，根据用户选择语言)设置salutation的值。
+
+	var myApp = angular.module(myApp, []).config(function(greeterProvider){
+		greeterProvider.setSalutation('Namaste');
+	});
+
+每当有人访问greeter对象实例的时候AngularJS都会吉利调用`$get`方法。
+
+> **警告！**
+>
+> 这里有一个轻量级的实现，但是它们之间的用法有明显的区别：
+
+	angular.module('myApp', []);
+>
+> 以及
+	
+	angular.module('myApp');
+
+> 这里的不同之处在于第一种方式会创建一个新的Angular模块，然后它会拉取在方括号([...])中列出的所依赖的模块。第二种方式使用的是现有的模块，它已经在第一次调用用定义好了。
+
+> 因此你应该确保在完整的应用程序中，下面的代码只使用一次就行了：
+
+	angular.module('myApp', [...]); // Or MyModule, if you are modularizing your app
+
+> 如果你不打算将它保存为一个变量并且跨应用程序引用它，然后在其他文件中使用`angular.module(MyApp)`来确保你获取的是一个正确处理过的AngularJS模块。模块中的一切都在模块定义中访问变量，或者直接将某些东西加入到模块定义的地方。
