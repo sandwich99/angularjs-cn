@@ -388,3 +388,75 @@ greeter工厂方法(它就是一个工厂函数或者说构造函数)看起来�
 	angular.module('myApp', [...]); // Or MyModule, if you are modularizing your app
 
 > 如果你不打算将它保存为一个变量并且跨应用程序引用它，然后在其他文件中使用`angular.module(MyApp)`来确保你获取的是一个正确处理过的AngularJS模块。模块中的一切都在模块定义中访问变量，或者直接将某些东西加入到模块定义的地方。
+
+## $on, $emit和$broadcast之间的作用域通信
+
+AngularJS中的作用域有一个非常有层次和嵌套分明的结构。其中它们都有一个主要的`$rootScope`(也就说对应的Angular应用或者`ng-app`)，然后其他所有的作用域部分都是继承自这个`$rootScope`的，或者说都是嵌套在主作用域下面的。很多时候，你会发现这些作用域不会共享变量或者说都不会从另一个原型继承什么。
+
+那么在这种情况下，如何在作用域之间通信呢？其中一个选择就是在应用程序作用域之中创建一个单例服务，然后通过这个服务处理所有子作用域的通信。
+
+在AngularJS中还有另外一个选择：通过作用域中的事件处理通信。但是这种方法有一些限制；例如，你并不能广泛的将事件传播到所有监控的作用域中。你必须选择是否与父级作用域或者子作用域通信。
+
+但是在我们讨论这些之前，那么如何监听这些事件呢？这里有一个例子，在我们任意的恒星系统的作用域中等待和监控一个我们称之为"planetDestroyed"的事件。
+
+	$scope.$on('planetDestoryed', function(event, galaxy, planet){
+		// Custom event, so what planet was destroyed
+		scope.alertNearbyPlanets(galaxy, planet);
+	});
+
+或许你会疑惑，传递给事件监听器的这些附加的参数是从哪里来的？那么就让我们来看看一个独立的planet是如何与它的父级作用域通信的。
+
+	scope.$emit('planetDestroyed', scope.myGalaxy, scope.myPlanet);
+
+`$emit`的附加参数是以作为监听器函数的函数参数的形式来传递的。并且，`$emit`只会从它自己当前作用域向上通信，因此，星球上的穷人们(如果它们有自身的作用域)在它们的星球被毁灭之前并不会收到通知。
+
+类似的，如果银河系统希望向下与它的成员通信，也就是恒星系统，那么它们之间的通信可能像下面这样：
+
+	scope.$emit('selfDestructSystem', targetSystem);
+
+然后，所有的恒星系统都可能在目标系统中监听这个事件，并使用下面的命令来决定它们是否应该自毁：
+
+	scope.$on('selfDestructSystem', function(event, targetSystem){
+		if(scope.mySystem === targetSystem){
+			scope.selfDestruct(); // Go ka-boom!!
+		}
+	});
+
+当然，正如事件向上(或者向下)传播，它都可能必须在同一级或者作用域中说："够了，你不能通过！"，或者阻止事件的默认行为。传递给监听器的事件对象都有函数来处理上面的这些所有事情，或者更多，因此让我们在表7-3中看看你可以获取事件对象的哪些信息。
+
+表7-3 事件对象的属性和方法
+
+<table>
+	<thead>
+		<tr>
+			<th>事件属性</th>
+			<th>目的</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>event.targetScope</td>
+			<td>发出或者传播原始事件的作用域</td>
+		</tr>
+		<tr>
+			<td>event.currentScope</td>
+			<td>目前正在处理的事件的作用域</td>
+		</tr>
+		<tr>
+			<td>event.name</td>
+			<td>事件名称</td>
+		</tr>
+		<tr>
+			<td>event.stopPropagation()</td>
+			<td>一个防止事件进一步传播(冒泡/捕获)的函数(这只适用于使用`$emit`发出的事件)</td>
+		</tr>
+		<tr>
+			<td>event.preventDefault()</td>
+			<td>这个方法实际上不会做什么事，但是会设置`defaultPrevented`为true。直到事件监听器的实现者采取行动之前它才会检查`defaultPrevented`的值。</td>
+		</tr>
+		<tr>
+			<td>event.defaultPrevented</td>
+			<td>如果调用了`preventDefault`则为true</td>
+		</tr>
+	</tbody>
+</table>
