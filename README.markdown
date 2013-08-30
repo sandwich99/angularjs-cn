@@ -140,7 +140,7 @@
 + $on, $emit和$broadcast之间的作用域通信
 + Cookies
 + 国际化和本地化
-  + 在AngularJS我能做什么?
+  + 在AngularJS中我能做什么?
   + 如何获取所有工作?
   + 常见问题
 + 净化HTML和模块
