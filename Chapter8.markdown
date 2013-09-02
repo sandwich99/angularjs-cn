@@ -20,7 +20,58 @@
 在我们开始实际代码之前，我们不得不做出一个设计决策：我们的这个组件的外观显示和交互设计应该是什么样子,假设我们想定义的的日期选择器在HTML里面使用像以下代码这样:
 
     <input datepicker ng-model="currentDate" select="updateMyText(date)" ></input>
+    
+也就是说我们想修改input输入域,通过给她添加一个叫datepicker的属性,来给它添加一些更多的功能(就像这样:它的数据值绑定到一个model上,当一个日期被选择的时候,输入域能被提醒修改).那么我们如何做到这一点哪?
 
+我们将要复用现存的功能组件:jQueryUI的datepicker(日期选择器),而不是我们从头自己构建一个日期选择器.我们只需要把它接入到AngularJS上并且理解它提供的钩子(hooks):
 
+    angular.module('myApp.directives', [])
+        .directive('datepicker', function() {
+            return {
+            // Enforce the angularJS default of restricting the directive to
+            // attributes only
+            restrict: 'A',
+            // Always use along with an ng-model
+            require: '?ngModel',
+            scope: {
+                // This method needs to be defined and
+                // passed in to the directive from the view controller
+                select: '&' // Bind the select function we refer to the
+                            // right scope
+            },
+            link: function(scope, element, attrs, ngModel) {
+                if (!ngModel) return;
 
+                var optionsObj = {};
+                optionsObj.dateFormat = 'mm/dd/yy';
+                var updateModel = function(dateTxt) {
+                    scope.$apply(function () {
+                        // Call the internal AngularJS helper to
+                        // update the two-way binding
+                        ngModel.$setViewValue(dateTxt);
+                    });
+                };
+                
+                optionsObj.onSelect = function(dateTxt, picker) {
+                    updateModel(dateTxt);
+                    if (scope.select) {
+                        scope.$apply(function() {
+                            scope.select({date: dateTxt});
+                        });
+                    }
+                };
 
+                ngModel.$render = function() {
+                    // Use the AngularJS internal 'binding-specific' variable
+                    element.datepicker('setDate', ngModel.$viewValue || '');
+                };
+                element.datepicker(optionsObj);
+            }
+        };
+    });
+
+    上面代码中的大多数都非常简单直接,但是我们还是来看一下其中一些较重要的部分.
+
+###ng-model
+
+我们可以得到一个ng-model属性,这个属性的值将会被传入到指令的链接函数中.
