@@ -536,3 +536,78 @@ AngularJS需要你有一个单独的`index.html`来处理每个受支持的语�
 **时区问题**
 
 AngularJS的日期/时间过滤器会直接获取来自浏览器的时区设置。因此它依赖于计算机的时区设置，不同的人可能看到不同的信息。无论时JS还是AngularJS都有任意的内置支持由开发者指定的显示时间的时区的机制。
+
+## 净化HTML和模块
+
+AngularJS会很认真对待其安全性，它会尝试尽最大的努力以确保将大多数的攻击转向最小化。一种常见的攻击方式就是注入不安全的HTML内容到你的web页面中，使用这种方式触发一个跨站攻击或者注入攻击。
+
+考虑有这样一个例子，在作用域中我们有一个称之为`myUnsafeHTMLContent`的变量。然后使用利用HTML，使用`OnMouseOver`指令修改元素的内容为`PWN3D!`，就像下面这样：
+
+	$scope.myUnsafeHTMLContent = '<p style="color:blue;>an html' +
+		'<em onmouseover="this.textContent=\'PWN3D!\'">click hreer</em>' +
+		'snippet</p>';
+
+在AngularJS中其默认行为是：你有一些HTML内容存储在一个变量中并且尝试绑定给它，其返回结果是AngularJS脱离你的内容并打印它。因此，最终得到的HTML内容被视为纯文本内容。
+
+因此：
+	
+	<div ng-bind='myUnsafeHTMLContent'></div>
+
+会返回：
+
+	<p style="color:blue">an html
+	<em onmouseover="this.textContent='PWN3D!'">click here</em> snippet</p>
+
+最后作为文本渲染在你的Web页面上。
+
+但是如果你想将`myUnsafeHTMLContent`的内容作为HTML呈现在你的AngularJS应用程序呢？在这种情况下，AngularJS惠友额外的指令(和用于引导的服务`$sanitize`)允许你以安全和不安全的方式呈现HTML。
+
+让我们先来看看使用安全形式的例子(通常也应该如此！)，并且呈现相关HTML，小心的避免HTML最可能受到攻击的部分。在这种情况下你会使用`ng-bind-html`指令。
+
+> `ng-bind-html`，`ng-bind-html-unsafe`以及linky过滤器都在`ngSanitize`模块中。因此在你的脚本依赖中需要包含`angular-sanitize.js`(或者`.min.js`)，然后添加一个`ngSanitize`模块依赖，在所有这些工作进行之前。
+
+那么当我么在同样的`myUnsafeHTMLContent`中使用`ng-bind-html`指令时会发生什么呢？就像这样：
+
+	<div ng-bind-html="myUnsafeHTMLContent "></div>
+
+在这种情况下输出内容就像下面这样：
+
+	an html _click here_ snippet
+
+重要的是要注意这里的样式标记(设置字体颜色为蓝色的样式)，以及\<em\>标签上的`onmouseover`事件处理器都被AngularJS移除了。它们被视为不安全的信息，因而被弃用。
+
+最终，如果你决定你确实像呈现`myUnsafeHTMLContent`的内容，无论你是真正相信`myUnsafeHTMLContent`的内容还是其他原因，那么你可以使用`ng-bind-html-unsafe`指令：
+
+	<div ng-bind-html-unsafe="myUnsafeHTMLContent"></div>
+
+那么这种情况下，输出的内容就像下面这样：
+
+	an html _cl ick here_ snippet
+
+此时文本颜色为蓝色(正如附加给p标签的样式)，并且click here还有一个注册给它的`onmouseover`指令。因此一旦你的鼠标从其他地方滑入click here这几个文本时，输出就为改变为:
+
+	an html PWN3D! snippet
+
+正如你可以看到的，显示中这是非常不安全的，因此大概你决定使用`ng-bind-html-unsafe`指令时你要绝对肯定这是你想要的。因为其他人可能很容易读取用户信息并发送到他/她的服务器中。
+
+### Linky
+
+目前`linky`过滤器也存在于`ngSanitize`模块中，并且基本上允许你将它添加到HTML内容中呈现并将现有的HTML转为锚点标记的链接。它的用法很简单，让我们来看一个例子：
+
+	$scope.contents = 'Text with links: http://angularjs.org/ & mailto:us@there.org';
+
+现在，如果你使用下面的方式来绑定数据：
+
+	<div ng-bind-html="contents"></div>
+
+这将导致数据会作为HTML内容打印在页面中，就像下面这样：
+
+	Text with links: http://angularjs.org/ & mailto:us@there.org
+
+接下来让我们看看如果我们使用`linky`过滤器会发生什么：
+
+	<div ng-bind-html="contents | l inky"></div>
+
+`linky`过滤器会通过在文本内容中的查找，给其中所有的URLs格式的文本添加一个\<a\>标签和一个`mailto`链接，从而最终展现给用户的HTML内容就编程下面这样了：
+
+	Text with links: http://angularjs.org/ & us@there.org
