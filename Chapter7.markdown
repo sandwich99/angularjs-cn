@@ -509,4 +509,18 @@ AngularJS支持下面所列出的i18n/L10n：
 
 所有的这些多元化的支持都是通过`$locale`服务来处理和维护的，用户管理本地特定的规则设置。`$locale`服务清理本地的IDs，一般由两部分组成：国家代码和语言代码。例如，`en_US`和`en_UK`，分别表示美式英语和英式英语。指定一个国家代码是可选的，并且只指定一个"en"也是有效的本地代码。
 
-### 
+### 如何获取所有工作？
+
+获取L10n(本地化)和i18n(国际化)工作的过程在AngularJS中分为三个步骤：
+
+**index.html changes**
+
+AngularJS需要你有一个单独的`index.html`来处理每个受支持的语言环境。你的服务器也需要知道所提供的`index.html`，根据用户地区的偏好设置(这也可以通过客户端的变化来触发，当用户改变它的语言环境时)。
+
+**创建语言环境规则集**
+
+接下来的步骤是针对每个受支持的语言环境创建一个`angular.js`，就像`angular_en-US.js`和`angular_zh-CN.js`。者涉及到在`angular.js`或者`angular.min.js`的结束处关联每个特定语言的本地规则(前面两个语言环境的默认文件就是`angular-locale_en_US.js`和`angular-locale_zh-CN.js`)。因此你的`angular_en-US.js`首先要包含`angular.js`的内容，然后就是`angular-locale_en-US.js`的内容。
+
+**本地规则集来源**
+
+最后一步就是涉及到你必须确保你的本地`index.html`引用本度规则集而不是原始的`angular.js`文件。因此`index_en-US.html`中应该使用`angular_en-US.js`而不是`angular.js`。
