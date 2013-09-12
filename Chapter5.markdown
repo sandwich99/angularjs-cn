@@ -418,6 +418,7 @@ ngResource依赖项是一个封装,它以Angular核心服务`$http`为基础.因
 另外,这种情况对错误处理也有很大影响.错误处理的最好方法是什么?在每次都做错误处理?那代码结构就会非常乱.
 
 为了解决上面这些问题,预期值建议(Promise proposal)机制提供了一个then函数的概念,这个函数会在响应成功返回的时候调用相关的函数去执行,另一方面，当产生错误的时候也会干相同的事，这样整个代码就有嵌套结构变为链式结构.所以之前那个例子用预期值API机制(至少在AngularJS中已经被实现的)改造一下,代码结构会平整许多：
+    
     var deferred = $q.defer();
     var fetchUser = function() {
         // After async calls, call deferred.resolve with the response value
