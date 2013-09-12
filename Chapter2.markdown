@@ -688,7 +688,7 @@ CountController定义如下:
 
 **watchAction**
 
-> 这是`watchFn`繁盛变化时会被调用的函数或者表达式. 在函数形式中, 它接受`watchFn`的新值, 旧值以及作用域的引用. 其签名就是`function(newValue, oldValue, scope)`.
+> 这是`watchFn`发生变化时会被调用的函数或者表达式. 在函数形式中, 它接受`watchFn`的新值, 旧值以及作用域的引用. 其签名就是`function(newValue, oldValue, scope)`.
 
 **deepWatch**
 
