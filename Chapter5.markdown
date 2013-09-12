@@ -395,7 +395,7 @@ ngResource依赖项是一个封装,它以Angular核心服务`$http`为基础.因
 预期值建议(Promise proposa)是AngularJS构建异步延迟API的底层基础.作为底层机制,预期值建议(Promise proposa)为异步请求做了下面这些事:
 
 + 异步请求返回的是一个预期(promise)而不是一个具体数据值.
-+ 预期值有一个`then`函数,这个函数有两个从拿书，一个参数函数响应"resolved“或者"sucess"事件,另外一个参数函数响应"rejected”或者"failure"事件.这些函数以一个结果参数调用，或者以一个拒绝原因参数调用.
++ 预期值有一个`then`函数,这个函数有两个参数，一个参数函数响应"resolved“或者"sucess"事件,另外一个参数函数响应"rejected”或者"failure"事件.这些函数以一个结果参数调用，或者以一个拒绝原因参数调用.
 + 确保当结果返回的时候，两个参数函数中有一个将会被调用
 
 大多数的延迟机制和Q(详见$q API文档)是以上面这种方法实现的,AngularJS为什么这样实现具体是因为以下原因:
@@ -418,6 +418,7 @@ ngResource依赖项是一个封装,它以Angular核心服务`$http`为基础.因
 另外,这种情况对错误处理也有很大影响.错误处理的最好方法是什么?在每次都做错误处理?那代码结构就会非常乱.
 
 为了解决上面这些问题,预期值建议(Promise proposal)机制提供了一个then函数的概念,这个函数会在响应成功返回的时候调用相关的函数去执行,另一方面，当产生错误的时候也会干相同的事，这样整个代码就有嵌套结构变为链式结构.所以之前那个例子用预期值API机制(至少在AngularJS中已经被实现的)改造一下,代码结构会平整许多：
+    
     var deferred = $q.defer();
     var fetchUser = function() {
         // After async calls, call deferred.resolve with the response value
@@ -512,8 +513,7 @@ AngularJS将会自动的把前缀字符串过滤掉,然后仅仅处理真实JSON
 + 用户A登录进他的银行帐号(http\:\/\/www.examplebank.com/)
 + 用户B意识到这点，然后诱导用户A访问用户B的个人主页
 + 主页上有一个特殊手工生成的图片连接地址，这个图片的的指向地址将会导致一次跨站请求伪造攻击,比如如下代码：
-
-    &lt;img src="http://www.examplebank.com/xfer?from=UserA&amount=10000&to=UserB"&gt;
+`<img src="http://www.examplebank.com/xfer?from=UserA&amount=10000&to=UserB" />`
 
 如果用户A的银行站点把授权信息保存在cookie里，且Cookie还没过期.当用户A打开用户B的站点时,就会导致非授权的用户A给用户B转账行为.
 
