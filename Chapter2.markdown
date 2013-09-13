@@ -1269,7 +1269,7 @@ HTML5中有一个伟大的称为`autofocus`的新属性, 将键盘的焦点放�
 	appModule.directive('ngbkFocus', function(){
 		return {
 			link: function(scope, elements, attrs, controller){
-				element[0].focus();
+				elements[0].focus();
 			}
 		};
 	});
