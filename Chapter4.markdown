@@ -284,7 +284,7 @@ Figure 4-1. Guthub: A simple recipe management application
 
 它基于前面隐藏的元素, 然后添加两个监听器到根作用域中. 当每次一个路由开始改变时, 它就显示该元素(通过改变它的class[className]), 每次路由成功改变并完成时, 它再一次隐藏`butterbar`.
 
-另一个有趣的事情是注意我们是如何注入`$rootScopr`到指令中的. 所有的指令都直接挂接到AngularJS的依赖注入系统, 因此你可以注入你的服务和其他任何需要的东西到其中.
+另一个有趣的事情是注意我们是如何注入`$rootScope`到指令中的. 所有的指令都直接挂接到AngularJS的依赖注入系统, 因此你可以注入你的服务和其他任何需要的东西到其中.
 
 最后需要注意的是处理元素的API. 使用jQuery的人会很高兴, 因为他直到使用的是一个类似jQuery的语法(addClass, removeClass). AngularJS实现了一个调用jQuery的自己, 因此, 对于任何AngularJS项目来说, jQuery都是一个可选的依赖项. 如果你最终在你的项目中使用完整的jQuery库, 你应该直到它使用的是它自己内置的jQlite实现.
 
