@@ -382,7 +382,7 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 ```
 注意这里有一点不同的是`link`函数获得了一个作用域的访问, 而`compile`没有. 这是因为在编译阶段期间, 作用域并不存在. 然而你有能力从`compile`函数返回`link`函数. 这些`link`函数能够访问到作用域.
 
-还要注意的是`compile`和`link`都会获得一个到它们对应的DOM袁术和这些元素属性[attributes]列表的引用. 这里的一点区别是`compile`函数是从模板中获得模板元素和属性, 并且会获取到`t`前缀. 而`link`函数使用模板创建的视图实例中获得它们的, 它们会获取到`i`前缀.
+还要注意的是`compile`和`link`都会获得一个到它们对应的DOM元素和这些元素属性[attributes]列表的引用. 这里的一点区别是`compile`函数是从模板中获得模板元素和属性, 并且会获取到`t`前缀. 而`link`函数使用模板创建的视图实例中获得它们的, 它们会获取到`i`前缀.
 
 这种区别只存在于当指令位于其他指令中制造模板副本的时候. `ng-repeat`就是一个很好的例子.
 ```html
@@ -394,7 +394,7 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 
 你可能还会注意到`compile`函数好哦的了一个`transclude`属性函数. 这里, 你还有机会以编写一个函数以编程的方式transcludes内容, 对于简单的的基于模板不足以transclusion的情况.
 
-最后, `compile`可以返回一个`preLink`和`postLink`函数, 而`link`仅仅指向一个`posyLink`函数. `preLink`, 正如它的名字所暗示的, 它运行在编译阶段之后, 但是会在指令链接到子元素之前. 同样的, `postLink`会运行在所有的子元素指令被链接之后. 这意味着如果你需要改变DOM结构, 你将在`posyLink`中处理. 在`preLink`中处理将会混淆流程并导致一个错误.
+最后, `compile`可以返回一个`preLink`和`postLink`函数, 而`link`仅仅指向一个`postLink`函数. `preLink`, 正如它的名字所暗示的, 它运行在编译阶段之后, 但是会在指令链接到子元素之前. 同样的, `postLink`会运行在所有的子元素指令被链接之后. 这意味着如果你需要改变DOM结构, 你将在`posyLink`中处理. 在`preLink`中处理将会混淆流程并导致一个错误.
 
 ###作用域
 
@@ -517,7 +517,7 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 				scope: { title: '=expanderTitle'},
 				template: '<div>' +
 						'<div class="title" ng-click="toggle()">{{title}}</div>' +
-						'<div class="body" ng-show="showMe" ng-tansclude></div>' +
+						'<div class="body" ng-show="showMe" ng-transclude></div>' +
 						'</div>',
 				link: function(scope, element, attris){
 					scope.showMe = false;
