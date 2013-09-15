@@ -731,7 +731,7 @@ Table 6-7. Options for required controllers
 			template: '<div ng-transclude></div>',
 			controller: function() {
 				var expanders = [];
-				this.gotOpened = function(selectdExpander) {
+				this.gotOpened = function(selectedExpander) {
 					angular.forEach(expanders, function(expander){
 						if(selectedExpander != expander) {
 							expander.showMe = false;
