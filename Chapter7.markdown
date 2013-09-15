@@ -2,6 +2,23 @@
 
 在这一章中, 我们将看一切目前Angular所实现的其他有用的特性, 但是我们不会涵盖所有的或者深入的章节和例子.
 
+## 目录
+
+- [$location](#location)
+- [HTML5模式和Hashbang模式](#html5模式和hashbang模式)
+- [AngularJS模块方法](#angularjs模块方法)
+	- [主方法在哪？](#主方法在哪)
+	- [加载和依赖](#加载和依赖)
+	- [快捷方法](#快捷方法)
+- [$on, $emit和$broadcast之间的作用域通信](#on-emit和broadcast之间的作用域通信)
+- [Cookies](#cookies)
+- [国际化和本地化](#国际化和本地化)
+	- [在AngularJS中我能做什么？](#在angularjs中我能做什么)
+	- [如何获取所有工作？](#如何获取所有工作)
+	- [常见问题](#常见问题)
+- [净化HTML和模块](#净化html和模块)
+	- [Linky](#linky)
+
 ## $location
 
 到现在为止, 你已经看到了不少使用AngularJS中的`$location`服务的例子. 它们大多数都只是短暂的一撇--在这里访问, 那里设置. 在这一小节, 我们将深入研究AngularJS中的`$location`服务时什么, 以及什么时候你应该使用它, 什么时候不应该使用它.
