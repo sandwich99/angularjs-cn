@@ -535,7 +535,7 @@ Angular加载和查找`ng-app`指令来判定应用程序界限.
 		width: 250px;
 	}
 	.expander > .title {
-		background-colo: black;
+		background-color: black;
 		color: white;
 		padding: .1em .3em;
 		cursor: pointer;
