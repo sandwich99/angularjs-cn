@@ -322,7 +322,238 @@
     "team in teamsList | filter:filterService.activeFilters |
     filter:filterService.searchText"
 
-这条语句的第一部分和之前的一样.后面的两个新的过滤器则让一切变得不一样了.第一个过滤器告诉AngualrJS用`filterService.activeFilters`域过滤列表数据.    
+这条语句的第一部分和之前的一样.后面的两个新的过滤器则让一切变得不一样了.第一个过滤器告诉AngualrJS用`filterService.activeFilters`域过滤列表数据.使用过滤对象的每个属性来过滤数据，确保迭代器里的每个循环项的属性值与过滤对象的对应属性值相匹配.所以如果`activeFilter[city]=Dallas`,那么迭代器里面只有那些`city=Dallas`的被选择出来显示.如果有多个过滤器对象，那所有过滤器对象的属性都得匹配.
+
+第二个过滤器是个文本值过滤器.它基本上只过滤那些只有其属性数据中出现`filterService.searchText`文本值即可.所以这个过滤的属性值会包含所有数据项：cities、team names、sports和featured.
+
+##AngularJS中的文件上传
+
+另外一个我们即将要看的常用情景示例是在AngularJS应用中如何实现文件上传功能.虽然目前支持这个功能可以通过HTML标准中的file类型的input输入域来做,但是为了达到这个示例的目的，我们将会扩展一个现存的文件上传解决方案.目前这方面的优秀实现之一是`BlueImp's File Upload`,它是用jQuery和JqueryUI实现(或者BootStrap)的.它的API相当简单,所以这样使得我们的AngularJS指令也超级简单.
+
+让我们从令定义的代码开始：
+
+    angular.module('myApp.directives', [])
+        .directive('fileupload', function() {
+        return {
+            restrict: 'A',
+            scope: {
+                done: '&',
+                progress: '&'
+            },
+            link: function(scope, element, attrs) {
+                var optionsObj = {
+                    dataType: 'json'
+                };
+                if (scope.done) {
+                    optionsObj.done = function() {
+                        scope.$apply(function() {
+                            scope.done({e: e, data: data});
+                        });
+                    };
+                }
+                if (scope.progress) {
+                    optionsObj.progress = function(e, data) {
+                        scope.$apply(function() {
+                            scope.progress({e: e, data: data});
+                        });
+                    }
+                }
+                // the above could easily be done in a loop, to cover
+                // all API's that Fileupload provides
+                element.fileupload(optionsObj);
+            }
+        };
+    });
+    
+这段代码帮助我们以一个非常简单的方式定义了我们这个指令,并且添加了`onDone`和`onProgress`两个函数钩子.我们使用函数绑定来使AngualrJS调用正确的方法而且使用正确的作用域.
+    
+这一切都是通过隔离的作用域定义来完成,它之中有两个函数绑定:一个对应`pregress`,另外一个对应`done`.我们将在作用域对象`scope`上创建一个单参数函数.比如：`scope.done`以一个对象为参数.这个对象内有两个属性键:`e`和`data`.这些都作为参数传递给原始定义的函数.这个函数我们将会在下一小节中看到.
+
+下面来让我们看一下我们的HTML代码来看看我们如何使用函数绑定:
+
+    <!DOCTYPE html>
+    <html ng-app="myApp">
+        <head lang="en">
+            <meta charset="utf-8">
+            <title>File Upload with AngularJS</title>
+            <!-- Because we are loading jQuery before AngularJS,
+                 Angular will use the jQuery library instead of
+                 its own jQueryLite implementation -->
+            <script
+                src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js">
+            </script>
+            <script
+                src="http://raw.github.com/blueimp/jQuery-File-Upload/master/js/vendor/
+                jquery.ui.widget.js">
+            </script>
+            <script
+                src="http://raw.github.com/blueimp/jQuery-File-Upload/master/js/
+                jquery.iframe-transport.js">
+            </script>
+            <script
+                src="http://raw.github.com/blueimp/jQuery-File-Upload/master/js/
+                jquery.fileupload.js">
+            </script>
+            <script
+                src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js">
+            </script>
+            <script src="app.js"></script>
+        </head>
+        <body ng-controller="MainCtrl">
+            File Upload:
+                <!-- We will define uploadFinished in MainCtrl and attach
+                     it to the scope, so that it is available here -->
+                <input id="testUpload"
+                       type="file"
+                       fileupload
+                       name="files[]"
+                       data-url="/server/uploadFile"
+                       multiple
+                       done="uploadFinished(e, data)">
+        </body>
+    </html>
+
+我们的input标签仅仅添加了以下附加部分:
+
+`fileupload`
+    这个使得input标签成为一个文件上传元素
+
+`data-url`
+    这个属性被FileUpload插件用来确定文件上传的服务器端处理URL.在我们的示例中,我们假设在`/server/uploadFile`URL上有一个服务器端API在监听处理上传的文件数据.
+    
+`multiple`
+    这个multiple属性告诉指令(以及fileupload组件)允许它一次性可以选择多个文件.我们可以通过插件轻松实现此功能，而不需要多写一行额外代码，这又是内建插件的一个福利啊。
+
+`done`
+    这是当插件文件上传结束以后AngularJS要调用的函数.如果我们想做，我们也可以以类似的方式为progress事件也定义一个函数.这也指定了我们的指令定义中调用的那两个参数函数.
+    
+那控制器看起来会是个什么样子那,正如你所期望的那样,它的代码是下面这样：
+
+    var app = angular.module('myApp', ['myApp.directives']);
+        app.controller('MainCtrl', function($scope) {
+        $scope.uploadFinished = function(e, data) {
+            console.log('We just finished uploading this baby...');
+        };
+    });
+有了上面这些代码,我们就有了一个简单的、可运行且可复用的文件上传指令.
+
+##使用Socket.IO
+
+目前Web开发中一个常见需求就是构建实时Web应用,也就是服务器端数据一更新,前端浏览器的数据也立即实时刷新.之前使用的技巧如轮询之类的被发现有缺陷,有时我们仅仅想建立一个连接前端的套接字(socket)用来通信.
+
+`Socket.IO`是一个优秀的库.它可以帮我们通过非常简单的基于事件API构建实时Web应用.下面我们将要开发一个实时的、匿名的消息广播系统(比如Twitter,不过不需要用户名),这个系统将帮助用户把自己的消息广播给所有的Socket.IO用户同时还可以看见系统的所有消息.这个系统中没有数据会被持久化存储,所以所有的消息只对那些在线活跃用户是可见的,但是这系统用于说明Socket.IO如何被优雅地集成进AngularJS这件事已经绰绰有余.
+
+说干就干,我们来把Socket.IO封装到一个AngularJS服务里.这样做，我们就可以保证以下几点:
+
+* Socket.IO的事件会在AngularJS的生命周期被激发和处理
+* 测试集成效果将变得很简单
+
+    var app = angular.module('myApp', []);
+    // We define the socket service as a factory so that it
+    // is instantiated only once, and thus acts as a singleton
+    // for the scope of the application.
+    app.factory('socket', function ($rootScope) {
+        var socket = io.connect('http://localhost:8080');
+        return {
+            on: function (eventName, callback) {
+                socket.on(eventName, function () {
+                    var args = arguments;
+                    $rootScope.$apply(function () {
+                        callback.apply(socket, args);
+                    });
+                });
+            },
+            emit: function (eventName, data, callback) {
+                socket.emit(eventName, data, function () {
+                    var args = arguments;
+                    $rootScope.$apply(function () {
+                        if (callback) {
+                            callback.apply(socket, args);
+                        }
+                    });
+                })
+            }
+        };
+    });
+
+此处我们只封装了我们关注的两个函数,他们分别是Socket.IO API中的on事件和broadcast事件方法.API中还有很多事件方法,我们可以以类似的方式封装他们.
+
+下面我们来看一下简单的`index.html`文件源码,将展示一个带发送按钮的文本框和一个消息列表.在这个示例中,我们并不跟踪谁发的消息以及什么时候发的.
+
+    <!DOCTYPE html>
+    <html ng-app="myApp">
+    <head lang="en">
+        <meta charset="utf-8">
+        <title>Anonymous Broadcaster</title>
+        <script src="/socket.io/socket.io.js">
+        </script>
+        <script
+            src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js">
+        </script>
+        <script src="app.js"></script>
+    </head>
+    <body ng-controller="MainCtrl">
+        <input type="text" ng-model="message">
+        <button ng-click="broadcast()">Broadcast</button>
+        <ul>
+            <li ng-repeat="msg in messages">{{msg}}</li>
+        </ul>
+    </body>
+    </html>
+
+下面我们看一下`MainCtrl`控制器(这段代码是app.js中的一部分),在这个控制器中我们将把上面这些整合起来:
+
+    function MainCtrl($scope, socket) {
+        $scope.message = '';
+        $scope.messages = [];
+        // When we see a new msg event from the server
+        socket.on('new:msg', function (message) {
+            $scope.messages.push(message);
+        });
+        // Tell the server there is a new message
+        $scope.broadcast = function() {
+            socket.emit('broadcast:msg', {message: $scope.message});
+            $scope.messages.push($scope.message);
+            $scope.message = '';
+        };
+    }
+    
+这个控制器本身非常简单.它监听套接字连接的事件,而且一旦用户点击广播按钮,就让服务知道有新消息了.并且把新消息添加到消息列表把它直接显示给当前用户.
+
+下面我们来完成最后一部分.这是NodeJS Server如何支撑前端应用的代码,它相应地用Socket.IOAPI建立了服务器端.
+
+    var app = require('express')()
+        , server = require('http').createServer(app)
+        , io = require('socket.io').listen(server);
+    server.listen(8080);
+    app.get('/', function (req, res) {
+        res.sendfile(__dirname + '/index.html');
+    });
+    app.get('/app.js', function(req, res) {
+        res.sendfile(__dirname + '/app.js');
+    });
+    io.sockets.on('connection', function (socket) {
+        socket.emit('new:msg', 'Welcome to AnonBoard');
+        socket.on('broadcast:msg', function(data) {
+            // Tell all the other clients (except self) about the new message
+            socket.broadcast.emit('new:msg', data.message);
+        });
+    });
+    
+以后你可以轻松地扩展这段代码以支持处理更多的消息和更复杂的结构,尽管如此,这段代码已经打好了基础,在其之上,你可以实现客户端浏览器和服务器端之间的套接字连接.
+
+整个示例应用非常简单.它没有做任何数据验证(不管消息是否为空),但是它包含AngularJS默认提供的HTML代码清理过滤功能.它没有处理复杂的消息,但是它提供了一个将Socket.IO集成进AngularJS的完全可用的端到端实现.你可以马上就基于它建立你自己的工作生产代码.
+
+##一个简单的分页服务
+
+
+
+
+
+
+
+
+
 
 
 
