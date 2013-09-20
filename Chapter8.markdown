@@ -144,4 +144,417 @@
 
 做到这一步,我们可以在浏览器内加载这个示例代码,你将会看到一个文本框,当你点击的时候,将会弹出一个jQueryUI日期选择器.选定日期后,显示文本"Not Selected"将会被更新为"Selected",选择日期也刷新显示,输入框内的日期也会被更新.
 
+##"小组成员列表"应用：数据过滤与控制器之间的通信
+
+在这个示例中,我们将同时处理很多事情,但是其中只有两个新技术点:
+
+1、怎样使用数据过滤器--特别是已简洁的方式使用--和重复指令(ng-repeat)一起用.
+2、怎样在没有共同继承关系的控制器之间通信.
+
+这个示例应用本身非常简单.其中只有数据，这些数据是各种体育运动队的成员列表.其中包含的运动有篮球、足球(橄榄球式的不是英式足球那种)和曲棍球.对于这些运动队的成员,我们有他们的姓名、所在城市、运动种类以及所在团队是不是主力团队.
+
+我们想做的是显示这个成员列表，在其左边显示过滤器，当过滤器数据发生变化的时候，成员列表数据做出相应的刷新.我们将要构建两个控制器.一个用来保存列表成员数据,另外一个运行过滤机制.我们将要使用一个服务来为列表控制器和过滤控制器之中的过滤数据变化做通信.
+
+想让我们看看这个服务,它将用来驱动整个应用：
+
+    angular.module('myApp.services', []).
+        factory('filterService', function() {
+            return {
+                activeFilters: {},
+                searchText: ''
+            };
+        });
+        
+哇哦,你也许会问：这就是全部?嗯，是的.我们此处所写代码基于这样一个事实:AngularJS 服务是单例模式的(这个以小写s打头的单例(singleton)是作用域scope内的单例,而不是那种全局可见且可读写的那种.)当你声明了一个过滤服务,我们就授权在整个应用范围内只有一个过滤服务的实例对象.
+
+接下来，我们里完成使用过滤服务作为过滤控制器和列表控制器之间的通信渠道的其它代码.两个控制器都可以绑定到它(过滤服务)上,而且两个都可以在它(过滤服务)更新时，读取它的成员属性.这两个控制器实际上都简单得要死,因为在其中除了简单的赋值,基本没做什么别的.
+
+    var app = angular.module('myApp', ['myApp.services']);
+    app.controller('ListCtrl', function($scope, filterService) {
+        $scope.filterService = filterService;
+        $scope.teamsList = [{
+                id: 1, name: 'Dallas Mavericks', sport: 'Basketball',
+                city: 'Dallas', featured: true
+            }, {
+                id: 2, name: 'Dallas Cowboys', sport: 'Football',
+                city: 'Dallas', featured: false
+            }, {
+                id: 3, name: 'New York Knicks', sport: 'Basketball',
+                city: 'New York', featured: false
+            }, {
+                id: 4, name: 'Brooklyn Nets', sport: 'Basketball',
+                city: 'New York', featured: false
+            }, {
+                id: 5, name: 'New York Jets', sport: 'Football',
+                city: 'New York', featured: false
+            }, {
+                id: 6, name: 'New York Giants', sport: 'Football',
+                city: 'New York', featured: true
+            }, {
+                id: 7, name: 'Los Angeles Lakers', sport: 'Basketball',
+                city: 'Los Angeles', featured: true
+            }, {
+                id: 8, name: 'Los Angeles Clippers', sport: 'Basketball',
+                city: 'Los Angeles', featured: false
+            }, {
+                id: 9, name: 'Dallas Stars', sport: 'Hockey',
+                city: 'Dallas', featured: false
+            }, {
+                id: 10, name: 'Boston Bruins', sport: 'Hockey',
+                city: 'Boston', featured: true
+            }
+        ];
+    });
+    app.controller('FilterCtrl', function($scope, filterService) {
+        $scope.filterService = filterService;
+    });
+    
+你也想知道:那部分代码会很复杂？AngularJS确实使这个示例整体非常简单,接下来我们所需要去做的就是把所有这一期在模版中整合在一起：
+
+    <!DOCTYPE html>
+    <html ng-app="myApp">
+    <head lang="en">
+        <meta charset="utf-8">
+        <title>Teams List App</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js">
+        </script>
+        <script
+            src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js">
+        </script>
+        <link rel="stylesheet"
+            href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/
+            css/bootstrap.min.css">
+        <script
+            src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/
+            bootstrap.min.js">
+        </script>
+        <script src="services.js"></script>
+        <script src="app.js"></script>
+    </head>
+    <body>
+    <div class="row-fluid">
+        <div class="span3" ng-controller="FilterCtrl">
+            <form class="form-horizontal">
+                <div class="controls-row">
+                    <label for="searchTextBox" class="control-label">Search:</label>
+                    <div class="controls">
+                        <input type="text"
+                            id="searchTextBox"
+                            ng-model="filterService.searchText">
+                    </div>
+                </div>
+                <div class="controls-row">
+                    <label for="sportComboBox" class="control-label">Sport:</label>
+                    <div class="controls">
+                        <select id="sportComboBox"
+                            ng-model="filterService.activeFilters.sport">
+                            <option ng-repeat="sport in ['Basketball', 'Hockey', 'Football']">
+                                {{sport}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="controls-row">
+                    <label for="cityComboBox" class="control-label">City:</label>
+                    <div class="controls">
+                        <select id="cityComboBox"
+                            ng-model="filterService.activeFilters.city">
+                            <option ng-repeat="city in ['Dallas', 'Los Angeles',
+                                                        'Boston', 'New York']">
+                                {{city}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="controls-row">
+                    <label class="control-label">Featured:</label>
+                    <div class="controls">
+                        <input type="checkbox"
+                            ng-model="filterService.activeFilters.featured"
+                            ng-false-value="" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="offset1 span8" ng-controller="ListCtrl">
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Sport</th>
+                    <th>City</th>
+                    <th>Featured</th>
+                </tr>
+                </thead>
+                <tbody id="teamListTable">
+                <tr ng-repeat="team in teamsList | filter:filterService.activeFilters |
+                               filter:filterService.searchText">
+                    <td>{{team.name}}</td>
+                    <td>{{team.sport}}</td>
+                    <td>{{team.city}}</td>
+                    <td>{{team.featured}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </body>
+    </html>
+
+在整个上面这个HTML模板代码里面,真正需要关注的只有四项.除此以外的旧的东西我们到目前为止可能都看了几十遍了(甚至这些旧代码点都曾经以这样那样的形式出现过).让我们来挨个看一下那四个新代码点:
+
+###搜索框
+
+搜索框的值用ng-model指令绑定到了过滤服务的searchText域上(`filterService.searchText`),这个属性域本身没什么值得注意的.但是在后面他将被用在过滤器上的方式使得现在这儿这步很关键.
+
+###组合框
+
+这儿有两个组合框,尽管我们只高亮了第一个.但是这两个工作方式相同.他们都绑定到过滤服务(filterService)的激活过滤器域(activeFilters)的sports属性或者city属性(取决于具体组合框).这个基本设置了过滤服务(`filtersService`)的filter对象的sports属性或者city属性.
+
+###复选框
+
+复选框绑定到了过滤服务(`filterService`)的激活过滤器域(`activeFilters`)的`featured`属性上.这里需要注意的是如果复选框被选定.我们想显示那些`featured=true`的主力团队.如果复选框没有被选定,我们想显示`featured=true`和`feature=false`的两种团队(也就是全部团队).为了达到这个效果,我们用`ng-false-value=""`指令来告诉程序当复选框没有选定的时候,`featured`这个过滤属性将会被清掉.
+
+###迭代器
+
+让我们再一次看一下`ng-repeat`这条语句：
+
+    "team in teamsList | filter:filterService.activeFilters |
+    filter:filterService.searchText"
+
+这条语句的第一部分和之前的一样.后面的两个新的过滤器则让一切变得不一样了.第一个过滤器告诉AngualrJS用`filterService.activeFilters`域过滤列表数据.使用过滤对象的每个属性来过滤数据，确保迭代器里的每个循环项的属性值与过滤对象的对应属性值相匹配.所以如果`activeFilter[city]=Dallas`,那么迭代器里面只有那些`city=Dallas`的被选择出来显示.如果有多个过滤器对象，那所有过滤器对象的属性都得匹配.
+
+第二个过滤器是个文本值过滤器.它基本上只过滤那些只有其属性数据中出现`filterService.searchText`文本值即可.所以这个过滤的属性值会包含所有数据项：cities、team names、sports和featured.
+
+##AngularJS中的文件上传
+
+另外一个我们即将要看的常用情景示例是在AngularJS应用中如何实现文件上传功能.虽然目前支持这个功能可以通过HTML标准中的file类型的input输入域来做,但是为了达到这个示例的目的，我们将会扩展一个现存的文件上传解决方案.目前这方面的优秀实现之一是`BlueImp's File Upload`,它是用jQuery和JqueryUI实现(或者BootStrap)的.它的API相当简单,所以这样使得我们的AngularJS指令也超级简单.
+
+让我们从令定义的代码开始：
+
+    angular.module('myApp.directives', [])
+        .directive('fileupload', function() {
+        return {
+            restrict: 'A',
+            scope: {
+                done: '&',
+                progress: '&'
+            },
+            link: function(scope, element, attrs) {
+                var optionsObj = {
+                    dataType: 'json'
+                };
+                if (scope.done) {
+                    optionsObj.done = function() {
+                        scope.$apply(function() {
+                            scope.done({e: e, data: data});
+                        });
+                    };
+                }
+                if (scope.progress) {
+                    optionsObj.progress = function(e, data) {
+                        scope.$apply(function() {
+                            scope.progress({e: e, data: data});
+                        });
+                    }
+                }
+                // the above could easily be done in a loop, to cover
+                // all API's that Fileupload provides
+                element.fileupload(optionsObj);
+            }
+        };
+    });
+    
+这段代码帮助我们以一个非常简单的方式定义了我们这个指令,并且添加了`onDone`和`onProgress`两个函数钩子.我们使用函数绑定来使AngualrJS调用正确的方法而且使用正确的作用域.
+    
+这一切都是通过隔离的作用域定义来完成,它之中有两个函数绑定:一个对应`pregress`,另外一个对应`done`.我们将在作用域对象`scope`上创建一个单参数函数.比如：`scope.done`以一个对象为参数.这个对象内有两个属性键:`e`和`data`.这些都作为参数传递给原始定义的函数.这个函数我们将会在下一小节中看到.
+
+下面来让我们看一下我们的HTML代码来看看我们如何使用函数绑定:
+
+    <!DOCTYPE html>
+    <html ng-app="myApp">
+        <head lang="en">
+            <meta charset="utf-8">
+            <title>File Upload with AngularJS</title>
+            <!-- Because we are loading jQuery before AngularJS,
+                 Angular will use the jQuery library instead of
+                 its own jQueryLite implementation -->
+            <script
+                src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js">
+            </script>
+            <script
+                src="http://raw.github.com/blueimp/jQuery-File-Upload/master/js/vendor/
+                jquery.ui.widget.js">
+            </script>
+            <script
+                src="http://raw.github.com/blueimp/jQuery-File-Upload/master/js/
+                jquery.iframe-transport.js">
+            </script>
+            <script
+                src="http://raw.github.com/blueimp/jQuery-File-Upload/master/js/
+                jquery.fileupload.js">
+            </script>
+            <script
+                src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js">
+            </script>
+            <script src="app.js"></script>
+        </head>
+        <body ng-controller="MainCtrl">
+            File Upload:
+                <!-- We will define uploadFinished in MainCtrl and attach
+                     it to the scope, so that it is available here -->
+                <input id="testUpload"
+                       type="file"
+                       fileupload
+                       name="files[]"
+                       data-url="/server/uploadFile"
+                       multiple
+                       done="uploadFinished(e, data)">
+        </body>
+    </html>
+
+我们的input标签仅仅添加了以下附加部分:
+
+`fileupload`
+    这个使得input标签成为一个文件上传元素
+
+`data-url`
+    这个属性被FileUpload插件用来确定文件上传的服务器端处理URL.在我们的示例中,我们假设在`/server/uploadFile`URL上有一个服务器端API在监听处理上传的文件数据.
+    
+`multiple`
+    这个multiple属性告诉指令(以及fileupload组件)允许它一次性可以选择多个文件.我们可以通过插件轻松实现此功能，而不需要多写一行额外代码，这又是内建插件的一个福利啊。
+
+`done`
+    这是当插件文件上传结束以后AngularJS要调用的函数.如果我们想做，我们也可以以类似的方式为progress事件也定义一个函数.这也指定了我们的指令定义中调用的那两个参数函数.
+    
+那控制器看起来会是个什么样子那,正如你所期望的那样,它的代码是下面这样：
+
+    var app = angular.module('myApp', ['myApp.directives']);
+        app.controller('MainCtrl', function($scope) {
+        $scope.uploadFinished = function(e, data) {
+            console.log('We just finished uploading this baby...');
+        };
+    });
+有了上面这些代码,我们就有了一个简单的、可运行且可复用的文件上传指令.
+
+##使用Socket.IO
+
+目前Web开发中一个常见需求就是构建实时Web应用,也就是服务器端数据一更新,前端浏览器的数据也立即实时刷新.之前使用的技巧如轮询之类的被发现有缺陷,有时我们仅仅想建立一个连接前端的套接字(socket)用来通信.
+
+`Socket.IO`是一个优秀的库.它可以帮我们通过非常简单的基于事件API构建实时Web应用.下面我们将要开发一个实时的、匿名的消息广播系统(比如Twitter,不过不需要用户名),这个系统将帮助用户把自己的消息广播给所有的Socket.IO用户同时还可以看见系统的所有消息.这个系统中没有数据会被持久化存储,所以所有的消息只对那些在线活跃用户是可见的,但是这系统用于说明Socket.IO如何被优雅地集成进AngularJS这件事已经绰绰有余.
+
+说干就干,我们来把Socket.IO封装到一个AngularJS服务里.这样做，我们就可以保证以下几点:
+
+* Socket.IO的事件会在AngularJS的生命周期被激发和处理
+* 测试集成效果将变得很简单
+
+    var app = angular.module('myApp', []);
+    // We define the socket service as a factory so that it
+    // is instantiated only once, and thus acts as a singleton
+    // for the scope of the application.
+    app.factory('socket', function ($rootScope) {
+        var socket = io.connect('http://localhost:8080');
+        return {
+            on: function (eventName, callback) {
+                socket.on(eventName, function () {
+                    var args = arguments;
+                    $rootScope.$apply(function () {
+                        callback.apply(socket, args);
+                    });
+                });
+            },
+            emit: function (eventName, data, callback) {
+                socket.emit(eventName, data, function () {
+                    var args = arguments;
+                    $rootScope.$apply(function () {
+                        if (callback) {
+                            callback.apply(socket, args);
+                        }
+                    });
+                })
+            }
+        };
+    });
+
+此处我们只封装了我们关注的两个函数,他们分别是Socket.IO API中的on事件和broadcast事件方法.API中还有很多事件方法,我们可以以类似的方式封装他们.
+
+下面我们来看一下简单的`index.html`文件源码,将展示一个带发送按钮的文本框和一个消息列表.在这个示例中,我们并不跟踪谁发的消息以及什么时候发的.
+
+    <!DOCTYPE html>
+    <html ng-app="myApp">
+    <head lang="en">
+        <meta charset="utf-8">
+        <title>Anonymous Broadcaster</title>
+        <script src="/socket.io/socket.io.js">
+        </script>
+        <script
+            src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js">
+        </script>
+        <script src="app.js"></script>
+    </head>
+    <body ng-controller="MainCtrl">
+        <input type="text" ng-model="message">
+        <button ng-click="broadcast()">Broadcast</button>
+        <ul>
+            <li ng-repeat="msg in messages">{{msg}}</li>
+        </ul>
+    </body>
+    </html>
+
+下面我们看一下`MainCtrl`控制器(这段代码是app.js中的一部分),在这个控制器中我们将把上面这些整合起来:
+
+    function MainCtrl($scope, socket) {
+        $scope.message = '';
+        $scope.messages = [];
+        // When we see a new msg event from the server
+        socket.on('new:msg', function (message) {
+            $scope.messages.push(message);
+        });
+        // Tell the server there is a new message
+        $scope.broadcast = function() {
+            socket.emit('broadcast:msg', {message: $scope.message});
+            $scope.messages.push($scope.message);
+            $scope.message = '';
+        };
+    }
+    
+这个控制器本身非常简单.它监听套接字连接的事件,而且一旦用户点击广播按钮,就让服务知道有新消息了.并且把新消息添加到消息列表把它直接显示给当前用户.
+
+下面我们来完成最后一部分.这是NodeJS Server如何支撑前端应用的代码,它相应地用Socket.IOAPI建立了服务器端.
+
+    var app = require('express')()
+        , server = require('http').createServer(app)
+        , io = require('socket.io').listen(server);
+    server.listen(8080);
+    app.get('/', function (req, res) {
+        res.sendfile(__dirname + '/index.html');
+    });
+    app.get('/app.js', function(req, res) {
+        res.sendfile(__dirname + '/app.js');
+    });
+    io.sockets.on('connection', function (socket) {
+        socket.emit('new:msg', 'Welcome to AnonBoard');
+        socket.on('broadcast:msg', function(data) {
+            // Tell all the other clients (except self) about the new message
+            socket.broadcast.emit('new:msg', data.message);
+        });
+    });
+    
+以后你可以轻松地扩展这段代码以支持处理更多的消息和更复杂的结构,尽管如此,这段代码已经打好了基础,在其之上,你可以实现客户端浏览器和服务器端之间的套接字连接.
+
+整个示例应用非常简单.它没有做任何数据验证(不管消息是否为空),但是它包含AngularJS默认提供的HTML代码清理过滤功能.它没有处理复杂的消息,但是它提供了一个将Socket.IO集成进AngularJS的完全可用的端到端实现.你可以马上就基于它建立你自己的工作生产代码.
+
+##一个简单的分页服务
+
+
+
+
+
+
+
+
+
+
+
+
 
