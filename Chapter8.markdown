@@ -546,15 +546,209 @@
 
 ##一个简单的分页服务
 
+大多数Web应用中一个常用的功能情景是显示一个项目列表.通常,我们有着比一个单个页面合理显示量更大的数据量.这样一个需求场景下,我们想以分页的方式显示这些数据，而且用户还可以在不同的页面之间穿梭.因为这一个在所有Web应用之中很常见的场景,所以有理由把这个功能抽取出来封装成一个公共可复用的分页服务.
 
+我们的分页服务(一个非常简单的实现)将帮助该服务的用户在给定的数据偏移量、单页数据量、数据总量条件下取得分页数据.它在内部将处理以下逻辑:某一页要取那些数据，如何下一页存在的情况下，下一页是那页等等必须功能逻辑.
 
+这个服务可以进一步扩展来在服务类缓存数据项,但是这个就作为练习题留给广大读者了.我们的示例全部所需要的就是把当前页数据项`currentPageItems`存储在缓存里.在它可用的情况下取出它，就相当于别的取数据函数`fetch Function`那一类的东西.
 
+下面我们看一下这个服务的实现:
 
+    angular.module(‘services’, []).factory('Paginator', function() {
+        // Despite being a factory, the user of the service gets a new
+        // Paginator every time he calls the service. This is because
+        // we return a function that provides an object when executed
+        return function(fetchFunction, pageSize) {
+            var paginator = {
+                hasNextVar: false,
+                next: function() {
+                    if (this.hasNextVar) {
+                        this.currentOffset += pageSize;
+                        this._load();
+                    }
+                },
+                _load: function() {
+                    var self = this;
+                    fetchFunction(this.currentOffset, pageSize + 1, function(items) {
+                        self.currentPageItems = items.slice(0, pageSize);
+                        self.hasNextVar = items.length === pageSize + 1;
+                    });
+                },
+                hasNext: function() {
+                    return this.hasNextVar;
+                },
+                previous: function() {
+                    if(this.hasPrevious()) {
+                        this.currentOffset -= pageSize;
+                        this._load();
+                    }
+                },
+                hasPrevious: function() {
+                    return this.currentOffset !== 0;
+                },
+                currentPageItems: [],
+                currentOffset: 0
+            };
+            // Load the first page
+            paginator._load();
+            return paginator;
+        };
+    });
 
+分页服务被调用的时候需要两个参数：一个是`fetch`取数据的函数,还有一个就是每页的大小.取数据的函数希望是如下这个函数签名：
 
+    fetchFunction(offset, limit, callback);
 
+一旦这个函数需要取得数来显示一个页面,它就会给以正确的数据偏移量、单页数据大小两个参数而被分页服务调用.在这个函数的内部,它可以或者从一个大的数据数据中做切片或者想服务器端发出请求取回数据.一旦数据可用,取数(`fetch`)函数就需要调用那个作为参数的回调函数.
 
+让我们看一下啊这个函数的设计说明,将要澄清说明我们在有一个包含太多返回数据项的大数组的前提下如何使用这个函数。请注意：这是一个单元测试.由于其实现方式的原因，我们可以在不需要任何控制器和XHR异步请求的情况下测试这个服务.
 
+    describe('Paginator Service', function() {
+        beforeEach(module('services'));
+        var paginator;
+        var items = [1, 2, 3, 4, 5, 6];
+        var fetchFn = function(offset, limit, callback) {
+            callback(items.slice(offset, offset + limit));
+        };
+        beforeEach(inject(function(Paginator) {
+            paginator = Paginator(fetchFn, 3);
+        }));
+        it('should show items on the first page', function() {
+            expect(paginator.currentPageItems).toEqual([1, 2, 3]);
+            expect(paginator.hasNext()).toBeTruthy();
+            expect(paginator.hasPrevious()).toBeFalsy();
+        });
+        it('should go to the next page', function() {
+            paginator.next();
+            expect(paginator.currentPageItems).toEqual([4, 5, 6]);
+            expect(paginator.hasNext()).toBeFalsy();
+            expect(paginator.hasPrevious()).toBeTruthy();
+        });
+        it('should go to previous page', function() {
+            paginator.next();
+            expect(paginator.currentPageItems).toEqual([4, 5, 6]);
+            paginator.previous();
+            expect(paginator.currentPageItems).toEqual([1, 2, 3]);
+        });
+        it('should not go next from last page', function() {
+            paginator.next();
+            expect(paginator.currentPageItems).toEqual([4, 5, 6]);
+            paginator.next();
+            expect(paginator.currentPageItems).toEqual([4, 5, 6]);
+        });
+        it('should not go back from first page', function() {
+            paginator.previous();
+            expect(paginator.currentPageItems).toEqual([1, 2, 3]);
+        });
+    });
 
+分页服务暴露其自身的`currentPageItems`当前分页数据项这个变量,这样它就可以在模板中被迭代器绑定(或者其它想显示这些数据项的地方).`hasNext()`和`hsrPreviour`两个函数可已被用来确定是否显示下一页或者上一页这两个链接.而在click事件上，我们只需要分别调用`next()`或者`previous()`这两个函数.
 
+那么在我们需要从服务器端取回每页数据的条件下这个服务应该如何使用哪？这儿有这么一个控制器:它每显示一页数据都需要从服务器端取回一次搜索结果数据.大概代码如下:
 
+    var app = angular.module('myApp', ['myApp.services']);
+    app.controller('MainCtrl', ['$scope', '$http', 'Paginator',
+        function($scope, $http, Paginator) {
+        $scope.query = 'Testing';
+        var fetchFunction = function(offset, limit, callback) {
+            $http.get('/search',
+                {params: {query: $scope.query, offset: offset, limit: limit}})
+                .success(callback);
+            };
+        $scope.searchPaginator = Paginator(fetchFunction, 10);
+    }]);
+
+使用这个分页服务的HTML页面代码数据如下:
+
+    <!DOCTYPE html>
+    <html ng-app="myApp">
+    <head lang="en">
+        <meta charset="utf-8">
+        <title>Pagination Service</title>
+        <script
+            src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js">
+        </script>
+        <script src="pagination.js"></script>
+        <script src="app.js"></script>
+    </head>
+    <body ng-controller="MainCtrl">
+        <input type="text" ng-model="query">
+        <ul>
+            <li ng-repeat="item in searchPaginator.currentPageItems">
+                {{item}}
+            </li>
+        </ul>
+        <a href=""
+            ng-click="searchPaginator.previous()"
+            ng-show="searchPaginator.hasPrevious()">&lt;&lt; Prev</a>
+        <a href=""
+            ng-click="searchPaginator.next()"
+            ng-show="searchPaginator.hasNext()">Next &gt;&gt;</a>
+    </body>
+    </html>
+
+##和服务器之间的协作与登录
+
+最后一个案例将要覆盖众多的场景,它们中的全部或者大多数都与`$http`资源有联系.在我们的经验中,`$http`服务是AngularJS核心服务之一.同时它可以被扩展来满足Web应用的很多常见功能需求,包括:
+
+* 共享一个公共错误处理代码点
+* 处理认证和登录之后的重定向
+* 与不支持或者支持JSON通信的服务器协作.
+* 通过JSONP与外部服务(非同域的)之间的通信
+
+所以在这个(轻度设计)的示例中,我们将会有一个成熟WebApp的骨架,它将会包括如下:
+
+1.在`butterbar`指令显示所有不可恢复的错误(不包括验证失败HTTP401响应),只有异常发生的时候，这个指令才会在屏幕上出现.
+2.将会有一个`ErrorService`,它将会被用来在指令、视图和控制器之间的通信工作.
+3.在服务器端响应401验证失败时激发一个事件(事件`loginRequired`).它将会被覆盖整个应用的根控制器所处理.
+4.处理那些需要带验证头信息的服务器请求,这些请求是特定于当前用户的.
+
+我们不会覆盖整个应用的所有元素(比如路由、模板等等),而且大多数代码是简明易懂的.我们只高亮显示那些与主题关系较密切的代码(便于您把这些代码复制粘帖到您的代码库中并以正确的方式开始编码).这些代码将会是完全功能性代码.如果你想看定义服务或者工厂的代码,请参阅第7章.如果你想看如何与服务器端协同合作,可以参考第5章.
+
+首先让我看回一下Error服务的代码:
+
+    var servicesModule = angular.module('myApp.services', []);
+    servicesModule.factory('errorService', function() {
+        return {
+            errorMessage: null,
+            setError: function(msg) {
+                this.errorMessage = msg;
+            },
+            clear: function() {
+                this.errorMessage = null;
+            }
+        };
+    });
+    
+我们的`error message`错误消息指令,它实际上与Error服务是独立的,它指挥寻找一个弹出框的消息属性，然后把它绑定到模板中.只有错误消息出现的情况下，弹出框才会显示.
+
+    // USAGE: <div alert-bar alertMessage="myMessageVar"></div>
+    angular.module('myApp.directives', []).
+    directive('alertBar', ['$parse', function($parse) {
+        return {
+            restrict: 'A',
+            template: '<div class="alert alert-error alert-bar"' +
+                'ng-show="errorMessage">' +
+                '<button type="button" class="close" ng-click="hideAlert()">' +
+                'x</button>' +
+                '{{errorMessage}}</div>',
+            link: function(scope, elem, attrs) {
+                var alertMessageAttr = attrs['alertmessage'];
+                scope.errorMessage = null;
+                scope.$watch(alertMessageAttr, function(newVal) {
+                    scope.errorMessage = newVal;
+                });
+                scope.hideAlert = function() {
+                    scope.errorMessage = null;
+                    // Also clear the error message on the bound variable.
+                    // Do this so that if the same error happens again
+                    // the alert bar will be shown again next time.
+                    $parse(alertMessageAttr).assign(scope, null);
+                };
+            }
+        };
+    }]);
+
+我们添加进HTML的弹出框代码将如下所示：
+
+    <div alert-bar alertmessage="errorService.errorMessage"></div>
