@@ -687,7 +687,68 @@
     </body>
     </html>
 
+##和服务器之间的协作与登录
 
+最后一个案例将要覆盖众多的场景,它们中的全部或者大多数都与`$http`资源有联系.在我们的经验中,`$http`服务是AngularJS核心服务之一.同时它可以被扩展来满足Web应用的很多常见功能需求,包括:
 
+* 共享一个公共错误处理代码点
+* 处理认证和登录之后的重定向
+* 与不支持或者支持JSON通信的服务器协作.
+* 通过JSONP与外部服务(非同域的)之间的通信
 
+所以在这个(轻度设计)的示例中,我们将会有一个成熟WebApp的骨架,它将会包括如下:
 
+1.在`butterbar`指令显示所有不可恢复的错误(不包括验证失败HTTP401响应),只有异常发生的时候，这个指令才会在屏幕上出现.
+2.将会有一个`ErrorService`,它将会被用来在指令、视图和控制器之间的通信工作.
+3.在服务器端响应401验证失败时激发一个事件(事件`loginRequired`).它将会被覆盖整个应用的根控制器所处理.
+4.处理那些需要带验证头信息的服务器请求,这些请求是特定于当前用户的.
+
+我们不会覆盖整个应用的所有元素(比如路由、模板等等),而且大多数代码是简明易懂的.我们只高亮显示那些与主题关系较密切的代码(便于您把这些代码复制粘帖到您的代码库中并以正确的方式开始编码).这些代码将会是完全功能性代码.如果你想看定义服务或者工厂的代码,请参阅第7章.如果你想看如何与服务器端协同合作,可以参考第5章.
+
+首先让我看回一下Error服务的代码:
+
+    var servicesModule = angular.module('myApp.services', []);
+    servicesModule.factory('errorService', function() {
+        return {
+            errorMessage: null,
+            setError: function(msg) {
+                this.errorMessage = msg;
+            },
+            clear: function() {
+                this.errorMessage = null;
+            }
+        };
+    });
+    
+我们的`error message`错误消息指令,它实际上与Error服务是独立的,它指挥寻找一个弹出框的消息属性，然后把它绑定到模板中.只有错误消息出现的情况下，弹出框才会显示.
+
+    // USAGE: <div alert-bar alertMessage="myMessageVar"></div>
+    angular.module('myApp.directives', []).
+    directive('alertBar', ['$parse', function($parse) {
+        return {
+            restrict: 'A',
+            template: '<div class="alert alert-error alert-bar"' +
+                'ng-show="errorMessage">' +
+                '<button type="button" class="close" ng-click="hideAlert()">' +
+                'x</button>' +
+                '{{errorMessage}}</div>',
+            link: function(scope, elem, attrs) {
+                var alertMessageAttr = attrs['alertmessage'];
+                scope.errorMessage = null;
+                scope.$watch(alertMessageAttr, function(newVal) {
+                    scope.errorMessage = newVal;
+                });
+                scope.hideAlert = function() {
+                    scope.errorMessage = null;
+                    // Also clear the error message on the bound variable.
+                    // Do this so that if the same error happens again
+                    // the alert bar will be shown again next time.
+                    $parse(alertMessageAttr).assign(scope, null);
+                };
+            }
+        };
+    }]);
+
+我们添加进HTML的弹出框代码将如下所示：
+
+    <div alert-bar alertmessage="errorService.errorMessage"></div>
