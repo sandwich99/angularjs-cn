@@ -34,28 +34,23 @@
 
 针对这个例子，我们在`hello.html`中来创建我们的模板：
 
-```html
 	<html ng-app>
 	<head>
 		<script src="angular.js"></script>
 		<script src="controller.js"></script>
 	</head>
-	
 	<body>
 		<div ng-controller="HelloController">
 			<p>{{greeting.text}}, World</p>
 		</div>
 	</body>
 	</html>    
-```
 
 接下来我们将逻辑编写在`controllers.js`中：
 
-```js
 	function HelloController($scope){
 		$scope.greeting = {text: 'Hello'};
 	}
-```
 
 最后将我们`hello.html`载入任意浏览器中，我们将看到如图1-1所示的信息：
 
@@ -114,13 +109,11 @@ MVC背后的核心思想是你可以在你的代码中清晰的分离数据管�
 
 下面是新的模板：
 
-```html
 	<html ng-app>
 	<head>
 		<script src="angular.js"></script>
 		<script src="controllers.js"></script>
 	</head>
-	
 	<body>
 		<div ng-controller="HelloController">
 			<input ng-model="greeting.text" />
@@ -128,7 +121,6 @@ MVC背后的核心思想是你可以在你的代码中清晰的分离数据管�
 		</div>
 	</body>
 	</html>
-```
 
 `HelloController`控制器可以保持不变。
 
@@ -152,12 +144,10 @@ MVC背后的核心思想是你可以在你的代码中清晰的分离数据管�
 
 正如我们将在后面的章节中会看到，`$scope`并不是我们唯一可以访问的东西。如果我们希望将数据绑定到用户浏览器的URL地址中，我们可以通过将数据绑定植入我们控制器的`$location`中来访问管理数据。就像这样：
 
-```js
 	function HelloController($scope, $location){
 		$scope.greeting = {text: 'Hello'};
 		//use $location for something good here...
 	}
-```
 
 这个神奇的效果是通过Angular的依赖注入系统实现的。依赖注入让我们遵循这种开发风格，而不是创建依赖，我们的类只需要知道它需要什么。
 
@@ -179,7 +169,6 @@ Angular自带了许多指令以帮助你定义应用程序的视图。后面我�
 
 接下来让我们来看一个较大的例子，它展示了更多的Angular的能力。想象一下，我们要创建一个购物应用程序。在应用程序的某个地方，我们需要展示用户的购物车并允许他编辑。接下来我们直接跳到那部分。
 
-```html
 	<html ng-app>
 	<head>
 	<title>Your Shopping Cart</title>
@@ -187,7 +176,7 @@ Angular自带了许多指令以帮助你定义应用程序的视图。后面我�
 	<body ng-controller="CartController">
 		<h1>Your Order</h1>
 		<div ng-repeat="item in items">
-			<span{{item.title}}</span>
+			<span>{{item.title}}</span>
 			<input ng-model="item.quantity" />
 			<span>{{item.price | currency}}</span>
 			<span>{{item.price * item.quantity | currency}}</span>
@@ -201,7 +190,7 @@ Angular自带了许多指令以帮助你定义应用程序的视图。后面我�
 				{title: 'Polka dots', quantity: 17, price: 12.95},
 				{title: 'Pebbles', quantity: 5, price: 6.95}
 			];
-			
+
 			$scope.remove = function(index){
 				$scope.items.splice(index, 1);
 			}
@@ -209,7 +198,6 @@ Angular自带了许多指令以帮助你定义应用程序的视图。后面我�
 		</script>
 	</body>
 	</html>
-```
 
 最终用户界面截屏如图1-4所示：
 
@@ -221,33 +209,24 @@ Angular自带了许多指令以帮助你定义应用程序的视图。后面我�
 
 让我们从顶部开始：
 
-```html
 	<html ng-app>
-```
 
 `ng-app`属性告诉Angular它应该管理页面的哪一部分。由于我们把它放在`<html>`元素中，这就会告诉Angular我们希望它管理整个页面。这往往也是你所希望的，但是如果你是在现有应用程序中集成Angular并使用其他方式管理页面，那么你可能希望把它放在应用程序中的某个`<div>`元素中。
 
-```html
 	<body ng-controller="CartController">
-```
 
 在Angular中，你用于管理页面某个区域的JavaScript类被称为控制器。通过在`body`标签中包含一个控制器，那么说明我的这个`CartController`将会管理`<body>`和`</body>`之间的所有东西。
 
-```html
 	<div ng-repeat="item in items">
-```
 
 `ng-repeat`的意思就是给被称为`items`数组中的每个元素都复制一次当前`<div>`里面的DOM结构。在每一个复制的div副本中，我们都会给当前元素设置一个名为`item`的属性，这样我们就可以在模板中使用它。你可以看到，结果返回的三个`<div>`中的每一个都包含产品的标题，数量，单价，总价以及一个用于移除当前条目的按钮。
 
-```html
 	<span>{{item.title}}</span>
-```
+
 
 正如我们在"Hello, World"例子中所示，数据绑定通过`{{ }}`让我们将一个变量的值插入到页面某部分中并保持数据同步。完整的表达式`{{item.title}}`会以迭代的方式检索当前item，然后将该item的title属性的内容插入到DOM中。
 
-```html
 	<input ng-model="item.quantity">
-```
 
 `ng-model`在输入字段和`item.quantity`的值之间定义并创建了数据绑定行为。
 
@@ -255,42 +234,33 @@ Angular自带了许多指令以帮助你定义应用程序的视图。后面我�
 
 因此我们通过使用`ng-model`来同步模型中的变化。`ng-model`声明了将`item.quantity`的值插入到文本域中，每当用户输入一个新的值时它也会自动更新`item.quantity`的值。
 
-```html
 	<span>{{item.price | currency}}</span>
 	<span>{{item.price * item.quantity | currency}}</span>
-```
+
 
 我们还希望单价和总价被格式化为美元形式。Angular自带了一个被称为过滤器的特性来让我们转换文本，在这里我们捆绑了一个被称为`currency`的过滤器用于给我们处理这里的美元格式操作。在下一章我们将会看到更多的过滤器。
 
-```html
 	<button ng-click="remove($index)">Remove</button>
-```
 
 这允许用户通过点击产品旁边的`remove`按钮来从他们的购物车中移除所选择的商品条目。在这里我们设置它点击这个按钮时调用`remove()`函数。我们还给它传递了一个`$index`参数，这个参数包含了它在`ng-repeat`中的索引值，这样我们就会知道哪一项将会被移除。
 
-```js
 	function CartController($scope)
-```
 
 这个`CartContoller`用于整个管理购物车应用的逻辑。这会告诉Angular，在这里它要给控制器传递一个叫做`$scope`的参数。这个`$scope`用于帮助我们在用户界面中将数据绑定到元素中。
 
-```js
 	$scope.items = [
 		{title: 'Paint pots', quantity: 8, price: 3.95},
 		{title: 'Polka dots', quantity: 17, price: 12.95},
 		{title: 'Pebbles', quantity: 5, price: 6.95}
 	];
-```
 
 通过定义`$scope.items`，我创建一个虚拟数据哈希表[数组]来表示用户的购物车。我们希望它可以用于UI中的数据绑定，因此将它添加到`$scope`中。
 
 当然，真正的购物车应用不可能只是在内存中工作，它需要访问服务器中正确存储的数据。我们将在后面的章节中讨论这些。
 
-```js
 	$scope.remove = function(index){
 		$scope.items.splice(index, 1);
 	}
-```
 
 我们还希望将`remove()`函绑定在UI中使用，因此我们也将它添加到`$scope`中。对于这个内存版本的购物车，`remove()`函数可以即时从数组中删除项目。由于`<div>`列表是通过`ng-repeat`创建的数据绑定，所以当项目消失时列表会自动收缩。记住，每当用户在UI界面上点击一个Remove按钮时，`remove()`函数就会被调用。
 
