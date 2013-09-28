@@ -752,3 +752,89 @@
 我们添加进HTML的弹出框代码将如下所示：
 
     <div alert-bar alertmessage="errorService.errorMessage"></div>
+    
+我们需要保证在上面这段HTML被新增前,`ErrorSerivce`必须以"errorService"属性名保存在作用域对象范围之内.也就是说:如果`RootController`是负责拥有`AlertBar`指令的控制器,那么代码应如下:
+
+    app.controller('RootController',
+                   ['$scope', 'ErrorService', function($scope, ErrorService) {
+        $scope.errorService = ErrorService;
+    });
+
+它给我们一个像样的框架来显示或隐藏错误信息和提示框.现在让我看看，如何利用拦截器来处理服务器端可能抛给我们的各种状态码:
+
+    servicesModule.config(function ($httpProvider) {
+        $httpProvider.responseInterceptors.push('errorHttpInterceptor');
+    });
+    // register the interceptor as a service
+    // intercepts ALL angular ajax HTTP calls
+    servicesModule.factory('errorHttpInterceptor',
+            function ($q, $location, ErrorService, $rootScope) {
+        return function (promise) {
+            return promise.then(function (response) {
+                return response;
+            }, function (response) {
+                if (response.status === 401) {
+                    $rootScope.$broadcast('event:loginRequired');
+                } else if (response.status >= 400 && response.status < 500) {
+                    ErrorService.setError('Server was unable to find' +
+                        ' what you were looking for... Sorry!!');
+                }
+                return $q.reject(response);
+            });
+        };
+    });
+    
+对于某些地方一些控制器来说，所有需要做的就是注册监听`loginRequired`事件,然后重定向到登录页面(或者做相对更复杂的效果,比如显示一个登录模态对话框).
+
+    $scope.$on('event:loginRequired', function() {
+        $location.path('/login');
+    });
+
+剩下的就是处理需要认证授权的Web请求了.我们目前只说所有需要认证授权的Web请求都有一个"Authorization"报头,这个报头的的值对于每一个当前登录用户是特定的.因为这个报头值每次登录都会改变,所以我们不能用默认的`transformRequests`,因为它的数据改变是在`config`级.取而代之的是，我们将会封装`$http`服务,从而构建我们自己的`AuthService`.
+
+我们也会有一个认证服务,他负责存储用户的认证信息(在你需要的时候读取它,通常是在登录过程中发生).`AuthHttp`服务将会访问这个认证服务并通过添加必要的报头来给Web请求授权.
+
+    // This factory is only evaluated once, and authHttp is memorized. That is,
+    // future requests to authHttp service return the same instance of authHttp
+    servicesModule.factory('authHttp', function($http, Authentication) {
+        var authHttp = {};
+        // Append the right header to the request
+        var extendHeaders = function(config) {
+            config.headers = config.headers || {};
+            config.headers['Authorization'] = Authentication.getTokenType() +
+                ' ' + Authentication.getAccessToken();
+        };
+        // Do this for each $http call
+        angular.forEach(['get', 'delete', 'head', 'jsonp'], function(name) {
+            authHttp[name] = function(url, config) {
+                config = config || {};
+                extendHeaders(config);
+                return $http[name](url, config);
+            };
+        });
+        angular.forEach(['post', 'put'], function(name) {
+            authHttp[name] = function(url, data, config) {
+                config = config || {};
+                extendHeaders(config);
+                return $http[name](url, data, config);
+            };
+        });
+        return authHttp;
+    });
+    
+任何需要授权的请求其请求发起函数将会用`authHttp.get()`取代`$http.get()`.只要Authentication服务的被设定是正确的信息,你的每次Web请求调用都会快捷如飞地通过认证.因为我们用一个服务来做授权这个事情,所以其信息对于整个Web应用来说都是可用的,也就不需要每次路由改变的时候都不得不去读取验证信息.
+
+这已经覆盖了我们在这个Web应用中需要的所有细节.你可以直接从这儿拷贝代码到你自己的应用代码中,让它为你工作.祝你好运.
+
+##总结
+
+当带着我们到这本书末尾的时候，我们几乎接近覆盖了关于AngularJS的所有内容.写这本书我们的目标就是给大家提供一个坚实的基础,在这个基础之上我们能开始我们的探索并且愉快地使用AngularJS做开发.我们覆盖了所有的基础知识(和一些高级话题),并且沿途提供了尽可能多的示例.
+
+大功告成，一切都做完了吗？不,我们还需要花大功夫去学习AngularJS外在功能之下的内在运行机制.比如我们的内容从没有涉及过如何构建复杂且相互依赖的指令.还有那么多的内容没有提及,我们用三本甚至四本书来讲可能都不够.但是我们希望这本书能够给你信心去处理碰到的更复杂的需求.
+
+我们花了大量的事件来写这本书,所以希望能够在Internet上看到一些惊艳的应用,这些应用是用AngularJS实现的.
+
+    
+    
+    
+    
