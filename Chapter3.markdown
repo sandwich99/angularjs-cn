@@ -619,7 +619,7 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
 		return angular.module(‘MyApp’, ['ngResource', 'controllers', 'services','filters', 'directives']);
 	});
 ```
-我们还有一个`bootstrap.js`文件, 它到等到DOM准备就绪(这里使用的RequireJS的插件`domReady`), 然后告诉AngularJS继续执行, 这是很好的.
+我们还有一个`bootstrap.js`文件, 它要等到DOM准备就绪(这里使用的RequireJS的插件`domReady`), 然后告诉AngularJS继续执行, 这是很好的.
 ```js
 	// The app/scripts/bootstrap.js file which tells AngularJS
 	// to go ahead and bootstrap when the DOM is loaded
