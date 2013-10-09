@@ -1,6 +1,39 @@
-#第二章 Angular应用程序剖析
+# 第二章 Angular应用程序剖析
 
 不像典型的库, 你需要挑选你喜欢的功能, 在Angular中所有的东西都被设计成一个用于协作的套件. 在本章中我们将涵盖Angular中所有的基本构建块, 这样你就可以理解如何将它们组合在一起. 这些块都将在后面的章节中有更详细的讨论.
+
+## 目录
+
+- [启用Angular](#启用angular)
+	- [加载脚本](#加载脚本)
+	- [使用ng-app声明Angular的界限](#使用ng-app声明angular的界限)
+- [模型/视图/控制器](#模型视图控制器)
+- [模板和数据绑定](#模板和数据绑定)
+	- [显示文本](#显示文本)
+	- [表单输入](#表单输入)
+	- [不唐突JavaScript的一些话](#不唐突javascript的一些话)
+	- [列表, 表格和其他重复的元素](#列表-表格和其他重复的元素)
+	- [隐藏与显示](#隐藏与显示)
+	- [CSS类和样式](#css类和样式)
+	- [src和href属性注意事项](#src和href属性注意事项)
+	- [表达式](#表达式)
+	- [分离用户界面(UI)和控制器职责](#分离用户界面ui和控制器职责)
+	- [使用作用域发布模型数据](#使用作用域发布模型数据)
+	- [使用$watch监控模型变化](#使用watch监控模型变化)
+	- [watch()中的性能注意事项](#watch中的性能注意事项)
+- [使用模块组织依赖](#使用模块组织依赖)
+- [使用过滤器格式化数据](#使用过滤器格式化数据)
+- [使用路由和$location更新视图](#使用路由和location更新视图)
+	- [index.html](#indexhtml)
+	- [list.html](#listhtml)
+	- [detail.html](#detailhtml)
+	- [controllers.js](#controllersjs)
+- [对话服务器](#对话服务器)
+- [使用指令更新DOM](#使用指令更新dom)
+	- [index.html](#indexhtml-1)
+	- [controller.js](#controllerjs)
+- [验证用户输入](#验证用户输入)
+- [小结](#小结)
 
 ##启用Angular
 
@@ -688,7 +721,7 @@ CountController定义如下:
 
 **watchAction**
 
-> 这是`watchFn`繁盛变化时会被调用的函数或者表达式. 在函数形式中, 它接受`watchFn`的新值, 旧值以及作用域的引用. 其签名就是`function(newValue, oldValue, scope)`.
+> 这是`watchFn`发生变化时会被调用的函数或者表达式. 在函数形式中, 它接受`watchFn`的新值, 旧值以及作用域的引用. 其签名就是`function(newValue, oldValue, scope)`.
 
 **deepWatch**
 
@@ -738,7 +771,7 @@ CountController定义如下:
         };
 
         $scope.subtotal = function(){
-            return $scope.totalCart() - $scope.discount;
+            return $scope.totalCart() - $scope.bill.discount;
         };
 
         function calculateDiscount(newValue, oldValue, scope){
@@ -814,7 +847,7 @@ CountController定义如下:
 ```
 注意这里`$watch`指定了一个`items`字符串. 这可能是因为`$watch`函数可以接受一个函数(正如我们之前那样)或者一个字符串. 如果传递一个字符串给`$watch`函数, 在`$scope`调用的作用域中它将被当作一个表达式.
 
-这种测策略在你的应用程序中可能工作得很好. 然而, 由我监控的是items数组, Angular将会制作一个副本以供我们进行比较. 对于一个较大的items清单, 如果我们在Angular每一次计算页面结果时只重新计算bill属性值, 它可能表现得更好. 我们可以通过创建一个`$watch`来做到这一点, 它带有只用于重新计算属性的`watchFn`函数. 就像这样:
+这种策略在你的应用程序中可能工作得很好. 然而, 由我监控的是items数组, Angular将会制作一个副本以供我们进行比较. 对于一个较大的items清单, 如果我们在Angular每一次计算页面结果时只重新计算bill属性值, 它可能表现得更好. 我们可以通过创建一个`$watch`来做到这一点, 它带有只用于重新计算属性的`watchFn`函数. 就像这样:
 ```js
     $scope.$watch(function(){
         var total = 0;
@@ -1236,7 +1269,7 @@ HTML5中有一个伟大的称为`autofocus`的新属性, 将键盘的焦点放�
 	appModule.directive('ngbkFocus', function(){
 		return {
 			link: function(scope, elements, attrs, controller){
-				element[0].focus();
+				elements[0].focus();
 			}
 		};
 	});

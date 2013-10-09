@@ -4,6 +4,26 @@
 
 在这一章，我们将讨论一下AngularJS如何帮你同服务器端通信，这其中包括在最底抽象等级的层面或者用它提供的优雅的封装器。而且我们将会深入探讨AngularJS如何用内建缓存机制来帮你加速你的应用.如果你想用`SocketIO`开发一个实时的Angular应用,那么第八章有一个例子，演示了如何把·SocketIO·封装成一个指令然后如何使用这个指令，在这一章，我们就不涉及这方面内容了.
 
+## 目录
+
+- [通过$http进行通行](#通过http进行通行)
+    - [进一步配置你的请求](#进一步配置你的请求)
+    - [设定HTTP头信息(Headers)](#设定http头信息headers)
+    - [缓存响应数据](#缓存响应数据)
+    - [对请求(Request)和响应(Response)的数据所做的转换](#对请求request和响应response的数据所做的转换)
+- [单元测试](#单元测试)
+- [使用RESTful资源](#使用restful资源)
+    - [resource资源的声明](#resource资源的声明)
+    - [定制方法](#定制方法)
+    - [不要使用回调函数机制!(除非你真的需要它们)](#不要使用回调函数机制除非你真的需要它们)
+    - [简化的服务器端操作](#简化的服务器端操作)
+    - [对ngResource做单元测试](#对ngresource做单元测试)
+- [$q和预期值(Promise)](#q和预期值promise)
+- [响应拦截处理](#响应拦截处理)
+- [安全方面的考虑](#安全方面的考虑)
+    - [JSON的安全脆弱性](#json的安全脆弱性)
+    - [跨站请求伪造(XSRF)](#跨站请求伪造xsrf)
+
 ##通过$http进行通行
 
 从Ajax应用(使用XMLHttpRequests)发动一个请求到服务器的传统方式包括：得到一个XMLHttpRequest对象的引用、发起请求、读取响应、检验错误代码然后最后处理服务器响应。它就是下面这样：
@@ -395,7 +415,7 @@ ngResource依赖项是一个封装,它以Angular核心服务`$http`为基础.因
 预期值建议(Promise proposa)是AngularJS构建异步延迟API的底层基础.作为底层机制,预期值建议(Promise proposa)为异步请求做了下面这些事:
 
 + 异步请求返回的是一个预期(promise)而不是一个具体数据值.
-+ 预期值有一个`then`函数,这个函数有两个从拿书，一个参数函数响应"resolved“或者"sucess"事件,另外一个参数函数响应"rejected”或者"failure"事件.这些函数以一个结果参数调用，或者以一个拒绝原因参数调用.
++ 预期值有一个`then`函数,这个函数有两个参数，一个参数函数响应"resolved“或者"sucess"事件,另外一个参数函数响应"rejected”或者"failure"事件.这些函数以一个结果参数调用，或者以一个拒绝原因参数调用.
 + 确保当结果返回的时候，两个参数函数中有一个将会被调用
 
 大多数的延迟机制和Q(详见$q API文档)是以上面这种方法实现的,AngularJS为什么这样实现具体是因为以下原因:
@@ -418,6 +438,7 @@ ngResource依赖项是一个封装,它以Angular核心服务`$http`为基础.因
 另外,这种情况对错误处理也有很大影响.错误处理的最好方法是什么?在每次都做错误处理?那代码结构就会非常乱.
 
 为了解决上面这些问题,预期值建议(Promise proposal)机制提供了一个then函数的概念,这个函数会在响应成功返回的时候调用相关的函数去执行,另一方面，当产生错误的时候也会干相同的事，这样整个代码就有嵌套结构变为链式结构.所以之前那个例子用预期值API机制(至少在AngularJS中已经被实现的)改造一下,代码结构会平整许多：
+    
     var deferred = $q.defer();
     var fetchUser = function() {
         // After async calls, call deferred.resolve with the response value
@@ -512,8 +533,7 @@ AngularJS将会自动的把前缀字符串过滤掉,然后仅仅处理真实JSON
 + 用户A登录进他的银行帐号(http\:\/\/www.examplebank.com/)
 + 用户B意识到这点，然后诱导用户A访问用户B的个人主页
 + 主页上有一个特殊手工生成的图片连接地址，这个图片的的指向地址将会导致一次跨站请求伪造攻击,比如如下代码：
-
-    &lt;img src="http://www.examplebank.com/xfer?from=UserA&amount=10000&to=UserB"&gt;
+`<img src="http://www.examplebank.com/xfer?from=UserA&amount=10000&to=UserB" />`
 
 如果用户A的银行站点把授权信息保存在cookie里，且Cookie还没过期.当用户A打开用户B的站点时,就会导致非授权的用户A给用户B转账行为.
 

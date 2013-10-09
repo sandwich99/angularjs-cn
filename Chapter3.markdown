@@ -14,6 +14,30 @@
 
 本章旨在提供一个20000英尺的视图以告诉你如何可行的布局你的AngularJS应用程序. 我们不会进入实际应用程序本身. 在第4章, 深入一个使用和展示了各种各样AngularJS特性的示例一用程序.
 
+## 目录
+
+- [项目组织](#项目组织)
+- [工具](#工具)
+- [运行你的应用程序](#运行你的应用程序)
+	- [使用Yeoman](#使用yeoman)
+	- [不使用Yeoman](#不使用yeoman)
+- [测试AngularJS](#测试angularjs)
+- [单元测试](#单元测试)
+- [端到端/集成测试](#端到端集成测试)
+- [编译](#编译)
+- [其他优秀工具](#其他优秀工具)
+	- [调试](#调试)
+	- [Batarang](#batarang)
+- [Yeoman: 优化你的工作流程](#yeoman-优化你的工作流程)
+	- [安装Yeoman](#安装yeoman)
+	- [启动一个新的AngularJS项目](#启动一个新的angularjs项目)
+	- [运行服务器](#运行服务器)
+	- [添加新的路由, 视图和控制器](#添加新的路由-视图和控制器)
+	- [测试的故事](#测试的故事)
+	- [构建项目](#构建项目)
+- [使用RequireJS整合AngularJS](#使用requirejs整合angularjs)
+
+
 ##项目组织
 
 推荐使用Yeoman构建你的项目, 将会为你的AngularJS应用程序创建所有必要的辅助程序文件.
@@ -595,7 +619,7 @@ Yeoman不支持压缩文件, 但是根据来发者提供的信息, 它很快会�
 		return angular.module(‘MyApp’, ['ngResource', 'controllers', 'services','filters', 'directives']);
 	});
 ```
-我们还有一个`bootstrap.js`文件, 它到等到DOM准备就绪(这里使用的RequireJS的插件`domReady`), 然后告诉AngularJS继续执行, 这是很好的.
+我们还有一个`bootstrap.js`文件, 它要等到DOM准备就绪(这里使用的RequireJS的插件`domReady`), 然后告诉AngularJS继续执行, 这是很好的.
 ```js
 	// The app/scripts/bootstrap.js file which tells AngularJS
 	// to go ahead and bootstrap when the DOM is loaded
