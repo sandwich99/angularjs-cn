@@ -190,7 +190,7 @@ Table 7-1 Functions on the $location service
 
 Hashbang方法能够在所有的浏览器中无缝的工作, 并且只需要最少的配置. 你只需要设置`hashBang`前缀(默认情况下为!)并且你可以做到更好.
 
-HTML模式中, 在另一方面, 还可以通过使用HTML5的History API来访问浏览器的URL. 而`$location`服务能够足够智能的判断浏览器是否支持HTML5模式, 必要的情况下还可以降级使用Hashbang方法, 因此你不需要担心额外的工作. 但是你不得不注意以下事情:
+HTML模式中, 在另一方面, 还可以通过使用HTML5的History API来访问浏览器的URL. 而`$location`服务能足够智能的判断浏览器是否支持HTML5模式, 必要的情况下还可以降级使用Hashbang方法, 因此你不需要担心额外的工作. 但是你不得不注意以下事情:
 
 **服务端配置**
 
