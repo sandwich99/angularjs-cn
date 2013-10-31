@@ -70,15 +70,15 @@ Table 6-1 HTML Validation Schemes
 
 	myModule.directive('namespaceDirectiveName', function factory(injectables) {
 		var directiveDefinitionObject = {
-			restrict: string,
+			restrict: string,//
 			priority: number,
 			template: string,
 			templateUrl: string,
 			replace: bool,
 			transclude: bool,
-			scope: bool or object,
+			scope: bool or object,//if bool 是否创建作用域 if obj 创建isolate作用域 且定义parent scope 通讯规则
 			controller: function controllerConstructor($scope, $element, $attrs, $transclude){...},
-			require: string,
+			require: string,//依赖的controller，可以加前缀 ^ ? ?^ 
 			link: function postLink(scope, iElement, iAttrs) {...},
 			compile: function compile(tElement, tAttrs, transclude){
 				return: {
